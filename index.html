@@ -459,7 +459,6 @@
         th { color: #777; font-weight: 500; padding: 8px; border-bottom: 1px solid var(--border-color); }
         td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #ccc; }
 
-        /* সেটিংস ট্যাব ডিজাইন */
         #settingsSection { display: none; }
         .settings-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; }
         
@@ -500,13 +499,11 @@
         }
         .logo-edit-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-solid); }
 
-        /* রিকোয়েস্ট পে আউট বক্স স্টাইল */
         .payout-request-box {
             background: #15151a; border: 1px solid var(--border-color); border-radius: 12px;
             padding: 20px; margin-top: 15px; text-align: center;
         }
 
-        /* --- ফুল-স্ক্রিন স্ট্যান্ডার্ড অ্যাড নিউ প্রোডাক্ট পেজ ডিজাইন --- */
         #addProductSection {
             display: none; width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px 15px;
         }
@@ -712,7 +709,6 @@
 
     <div id="toastBox"></div>
 
-    <!-- লগইন সেকশন -->
     <div id="loginSection" style="display: none;">
         <img src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="seller-logo-img">
         <h1 class="seller-sub-title">rorraxy - become a seller</h1>
@@ -721,7 +717,6 @@
         </button>
     </div>
 
-    <!-- মেইন ড্যাশবোর্ড সেকশন -->
     <div id="dashboardSection">
         <header class="dash-header">
             <div class="dash-logo-area">
@@ -757,7 +752,6 @@
                 </div>
             </div>
 
-            <!-- রিকোয়েস্ট পে আউট সেকশন (ড্যাশবোর্ডে যুক্ত) -->
             <div class="payout-request-box">
                 <h3 style="color: var(--gold-solid); font-size: 0.95rem; margin-top:0; margin-bottom: 10px;"><i class="fa-solid fa-money-check-dollar"></i> Request Payout</h3>
                 <p style="color: var(--text-gray); font-size: 0.78rem; margin-bottom: 15px;">Withdraw your available earnings directly to your configured payout method.</p>
@@ -767,7 +761,6 @@
                 </div>
             </div>
 
-            <!-- প্রোডাক্ট তালিকা এবং ডিলিট অপশন সম্বলিত টেবিল -->
             <div class="card-box" style="margin-top: 20px;">
                 <div class="card-box-header">
                     <h3>My Store Products</h3>
@@ -798,11 +791,9 @@
             </div>
         </div>
 
-        <!-- সেটিংস ট্যাব সেকশন (ব্যাক বাটনসহ) -->
         <div id="settingsSection">
             <div class="settings-container">
                 
-                <!-- সেটিংস থেকে ড্যাশবোর্ডে ফিরে যাওয়ার ব্যাক বাটন -->
                 <div class="settings-top-actions">
                     <button type="button" class="back-cat-btn" onclick="switchTab('dashboard')" style="margin:0;"><i class="fa-solid fa-arrow-left"></i> BACK TO DASHBOARD</button>
                     <span style="font-size: 0.85rem; font-weight: 600; color: var(--gold-solid);">Seller Settings</span>
@@ -825,7 +816,6 @@
                     <button class="sub-tab-btn" onclick="switchSettingsTab('tab2FA', this)"><i class="fa-solid fa-shield-halved"></i> 2FA Security</button>
                 </div>
 
-                <!-- একাউন্ট ইনফো ট্যাব (১৯৫+ দেশের ফ্ল্যাগ ও কোডসহ) -->
                 <div id="tabAccount" class="sub-tab-content active" style="margin-top: 15px;">
                     <form onsubmit="saveAccountForm(event)">
                         <h4 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0;">Seller Full Profile & Store Information</h4>
@@ -1115,7 +1105,6 @@
         </div>
     </div>
 
-    <!-- ফুল-স্ক্রিন স্ট্যান্ডার্ড অ্যাড নিউ প্রোডাক্ট পেজ -->
     <div id="addProductSection">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
             <button type="button" class="back-cat-btn" onclick="switchTab('dashboard')"><i class="fa-solid fa-arrow-left"></i> BACK TO DASHBOARD</button>
