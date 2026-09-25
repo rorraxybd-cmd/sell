@@ -522,6 +522,42 @@
         .modal-option-card .opt-title { font-size: 0.8rem; font-weight: 600; margin: 0 0 2px 0; color: #fff; }
         .modal-option-card .opt-desc { font-size: 0.68rem; margin: 0; color: var(--text-gray); }
 
+        /* সুন্দরভাবে গুছিয়ে দেওয়া ফ্রি শিপিং পলিসি নোটিফিকেশন ডিজাইন */
+        .free-shipping-policy-banner {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(20, 20, 23, 0.95));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 18px 22px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .shipping-banner-icon {
+            font-size: 1.4rem;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 2px;
+        }
+        .shipping-banner-content h4 {
+            margin: 0 0 6px 0;
+            font-size: 0.88rem;
+            font-weight: 700;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .shipping-banner-content p {
+            margin: 0;
+            font-size: 0.76rem;
+            color: #dcdcdc;
+            line-height: 1.6;
+        }
+
         .shipping-warning-note {
             background: rgba(212, 175, 55, 0.05);
             border: 1px solid rgba(212, 175, 55, 0.2);
@@ -827,9 +863,15 @@
                 </button>
             </div>
 
-            <div class="shipping-warning-note">
-                <i class="fa-solid fa-triangle-exclamation" style="color: var(--gold-solid); margin-right: 6px;"></i>
-                <strong>Hybrid Order Logistics Note:</strong> Orders can be updated via automated courier API or dynamically overridden with manual local/international tracking IDs below.
+            <!-- সুন্দরভাবে গুছিয়ে দেওয়া ফ্রি শিপিং পলিসি নোটিফিকেশন ব্যানার -->
+            <div class="free-shipping-policy-banner">
+                <div class="shipping-banner-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="shipping-banner-content">
+                    <h4>Free Shipping Policy Note</h4>
+                    <p>VAT, tax, and courier service charges are entirely factored into the product base pricing. Our platform strictly operates on a Free Shipping Delivery model.</p>
+                </div>
             </div>
 
             <!-- Store Orders & Hybrid Tracking Section -->
