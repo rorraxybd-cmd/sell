@@ -1,1 +1,525 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>rorraxy - Add New Product</title>
+    
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1qyOXxZ8s2cJMEo66NDE4BdoxiC4hy_sG">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        :root {
+            --bg-retail: #050505;
+            --header-retail: rgba(10, 10, 12, 0.95);
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --gold-solid: #d4af37;
+            --text-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --font-main: 'Poppins', sans-serif;
+        }
+
+        html, body { 
+            width: 100%; max-width: 100%; overflow-x: hidden; 
+            background: var(--bg-retail) !important; 
+            color: var(--text-white); font-family: var(--font-main); 
+            min-height: 100vh; font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body { padding-top: 90px; padding-bottom: 60px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        header.app-header {
+            display: flex; flex-direction: column; padding: 14px 20px; align-items: center;
+            background: var(--header-retail); position: fixed; top: 0; left: 0; z-index: 1000;
+            backdrop-filter: blur(15px); width: 100%; border-bottom: 1px solid rgba(212,175,55,0.15);
+        }
+        .header-top-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1400px; }
+        .back-home-btn { background: #121216; border: 1px solid rgba(212,175,55,0.2); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; text-decoration: none; transition: 0.3s; }
+        .back-home-btn:hover { border-color: var(--gold-solid); color: var(--gold-solid); }
+        .brand-title-main { font-size: 1.2rem; font-weight: 700; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1.5px; }
+
+        .form-container { width: 100%; max-width: 1300px; margin: 0 auto; padding: 20px; }
+        
+        .form-card { background: #101014; border: none; border-radius: 16px; padding: 30px; margin-bottom: 25px; box-shadow: 0 12px 45px rgba(0,0,0,0.85); width: 100%; }
+        .form-card h3 { font-size: 1.15rem; color: var(--text-white); margin-bottom: 22px; border-bottom: 1px solid rgba(212,175,55,0.12); padding-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .form-card h3 i { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; }
+        @media(min-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media(min-width: 1024px) { .category-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+
+        .cat-box { background: #15151a; border: none; border-radius: 14px; padding: 24px 18px; text-align: center; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 100%; }
+        .cat-box:hover { background: #1f1f28; transform: translateY(-4px); box-shadow: 0 8px 25px rgba(191,149,63,0.18); }
+        .cat-box.clicked { background: #242012; box-shadow: inset 0 0 0 2px #bf953f, 0 0 20px rgba(191,149,63,0.35); }
+        .cat-box i { font-size: 2.2rem; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .cat-box span { font-size: 0.85rem; font-weight: 600; color: var(--text-white); letter-spacing: 0.5px; word-break: break-word; }
+
+        .back-cat-btn { background: #15151a; border: none; color: var(--gold-solid); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .back-cat-btn:hover { background: #202028; }
+
+        .selected-badge { background: #15151a; border-left: 4px solid #bf953f; color: var(--text-white); padding: 14px 20px; border-radius: 10px; font-size: 0.92rem; font-weight: 500; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.4); width: 100%; }
+        .selected-badge strong { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .input-group { margin-bottom: 20px; width: 100%; }
+        .input-group label { display: block; font-size: 0.85rem; color: var(--text-gray); margin-bottom: 8px; font-weight: 500; letter-spacing: 0.3px; }
+        .input-group input, .input-group textarea {
+            width: 100%; background: #15151a; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+            padding: 16px; color: var(--text-white); font-family: var(--font-main); font-size: 0.95rem; outline: none; transition: 0.3s;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            background: #1c1c24; border-color: var(--gold-solid); box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 10px rgba(191,149,63,0.3);
+        }
+        .input-group input:invalid:not(:placeholder-shown), 
+        .input-group textarea:invalid:not(:placeholder-shown) {
+            border-color: #ff4d4d;
+            box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+        }
+
+        .required-star { color: #ff4d4d; margin-left: 3px; }
+
+        .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+        @media(max-width: 576px) { .row-grid { grid-template-columns: 1fr; } }
+
+        .ai-helper-box { background: #15151a; border-left: 3px solid #bf953f; border-radius: 0 12px 12px 0; padding: 16px; margin-bottom: 18px; font-size: 0.83rem; color: var(--text-gray); line-height: 1.6; }
+        .ai-helper-box strong { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
+
+        .preview-container { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; width: 100%; }
+        .preview-card { position: relative; width: 85px; height: 85px; border-radius: 10px; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(191,149,63,0.4), 0 4px 15px rgba(0,0,0,0.6); }
+        .preview-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        .upload-box { border: 2px dashed rgba(191,149,63,0.3); border-radius: 14px; padding: 30px 20px; text-align: center; cursor: pointer; background: #15151a; transition: 0.3s; width: 100%; }
+        .upload-box:hover { border-color: #bf953f; background: #1c1c24; box-shadow: 0 0 20px rgba(191,149,63,0.15); }
+        .upload-box i { font-size: 2.5rem; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .upload-box p { font-size: 0.85rem; color: var(--text-gray); }
+
+        .next-btn, .submit-btn {
+            width: 100%; background: var(--gold-gradient); color: #050505; border: none; padding: 16px;
+            border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 6px 25px rgba(191,149,63,0.3); transition: 0.3s; margin-top: 12px; letter-spacing: 0.5px;
+        }
+        .next-btn:hover, .submit-btn:hover { opacity: 0.93; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(191,149,63,0.45); }
+
+        .hidden-step { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- হেডার -->
+    <header class="app-header">
+        <div class="header-top-bar">
+            <a href="seller.html" class="back-home-btn"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+            <span class="brand-title-main">ADD NEW PRODUCT</span>
+            <div style="width: 60px;"></div>
+        </div>
+    </header>
+
+    <!-- মূল ফর্ম সেকশন -->
+    <main class="form-container">
+        <form id="productForm" onsubmit="saveProductData(event)">
+            
+            <!-- হিডেন ক্যাটাগরি ইনপুট -->
+            <input type="hidden" id="selected_category" name="selected_category" required>
+
+            <!-- ধাপ ১: ক্যাটাগরি সিলেকশন -->
+            <div class="form-card" id="step-category-card">
+                <h3><i class="fa-solid fa-border-all"></i> Select Category</h3>
+                
+                <div id="main-categories" class="category-grid">
+                    <div class="cat-box" onclick="showSubCategories(this, 'womens')">
+                        <i class="fa-solid fa-person-dress"></i>
+                        <span>WOMEN'S FASHION</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'mens')">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span>MEN'S FASHION</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'boys')">
+                        <i class="fa-solid fa-child"></i>
+                        <span>BOYS' FASHION</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'girls')">
+                        <i class="fa-solid fa-child-dress"></i>
+                        <span>GIRLS' FASHION</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'luxury')">
+                        <i class="fa-solid fa-gift"></i>
+                        <span>LUXURY GIFTS</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'matching')">
+                        <i class="fa-solid fa-people-group"></i>
+                        <span>MATCHING SETS</span>
+                    </div>
+                    <div class="cat-box" onclick="showSubCategories(this, 'baby')">
+                        <i class="fa-solid fa-baby-carriage"></i>
+                        <span>MOTHER & BABY</span>
+                    </div>
+                </div>
+
+                <div id="sub-categories" class="hidden-step">
+                    <button type="button" class="back-cat-btn" onclick="backToMainCategories()"><i class="fa-solid fa-arrow-left"></i> Back to Main Categories</button>
+                    <div id="sub-cat-content" class="category-grid"></div>
+                </div>
+            </div>
+
+            <!-- ক্যাটাগরি কনফার্মেশন ব্যাজ -->
+            <div id="selection-display" class="hidden-step selected-badge">
+                <span>Category: <strong id="chosen-cat-text">None</strong></span>
+                <button type="button" class="back-cat-btn" style="margin:0; padding: 6px 12px; font-size:0.78rem;" onclick="resetCategorySelection()">Change</button>
+            </div>
+
+            <!-- ধাপ ২: প্রোডাক্ট ইনফরমেশন -->
+            <div class="form-card hidden-step" id="step-product-info">
+                <h3><i class="fa-solid fa-box-open"></i> Product Information</h3>
+                
+                <div class="input-group">
+                    <label for="product_name">Product Title (Max 25 Characters)<span class="required-star">*</span></label>
+                    <input type="text" id="product_name" name="product_name" maxlength="25" placeholder="Enter title (max 25 chars)" required>
+                </div>
+
+                <div class="row-grid">
+                    <div class="input-group">
+                        <label for="selling_price">Selling Price ($)<span class="required-star">*</span></label>
+                        <input type="number" step="0.01" min="0" id="selling_price" name="selling_price" placeholder="100.00" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="market_price">Market Price ($)<span class="required-star">*</span></label>
+                        <input type="number" step="0.01" min="0" id="market_price" name="market_price" placeholder="180.00" required>
+                    </div>
+                </div>
+
+                <div class="row-grid">
+                    <div class="input-group">
+                        <label for="int_discount">International Discount (Optional)</label>
+                        <input type="text" id="int_discount" name="int_discount" placeholder="10% OFF">
+                    </div>
+                    <div class="input-group">
+                        <label for="bd_discount">BD Discount (Optional)</label>
+                        <input type="text" id="bd_discount" name="bd_discount" placeholder="10% OFF">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="stock">Stock Quantity<span class="required-star">*</span></label>
+                    <input type="number" min="1" id="stock" name="stock" value="100" required>
+                </div>
+
+                <button type="button" class="next-btn" onclick="validateAndProceedInfo()">Next: Description & Customization <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+
+            <!-- ধাপ ৩: ডেসক্রিপশন এবং ফিক্সড কাস্টম সাইজ/নোট -->
+            <div class="form-card hidden-step" id="step-description-custom">
+                
+                <h3><i class="fa-solid fa-pen-to-square"></i> Product Description</h3>
+                
+                <div class="ai-helper-box">
+                    <strong>AI Assistant Tip:</strong> Copy and paste AI-generated descriptions containing material, size, and fit details.
+                </div>
+
+                <div class="input-group" style="margin-bottom: 25px;">
+                    <label for="description">Full Details (Materials, Sizes, Fit & Features)<span class="required-star">*</span></label>
+                    <textarea id="description" name="description" rows="5" placeholder="Crafted with precision engineering and high-grade sustainable materials..." required></textarea>
+                </div>
+
+                <!-- ফিক্সড কাস্টম সাইজ/নোট বক্স -->
+                <h3><i class="fa-solid fa-sliders"></i> Custom Size / Note</h3>
+                <div class="input-group" style="margin-bottom: 25px;">
+                    <label for="custom_notes">Custom Size / Note</label>
+                    <textarea id="custom_notes" name="custom_notes" rows="3" placeholder="Enter custom size or note instructions..."></textarea>
+                </div>
+
+                <!-- চ্যাট উইথ সেলার অপশন ইন্ডিকেটর -->
+                <h3><i class="fa-solid fa-comments"></i> Customer Communication</h3>
+                <div style="background:#15151a; padding:14px 18px; border-radius:12px; color:var(--text-gray); font-size:0.85rem; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                    <i class="fa-solid fa-circle-check" style="color:var(--gold-solid);"></i>
+                    <span><strong>"Chat With Seller"</strong> button is automatically enabled with live multi-seller instant notification support.</span>
+                </div>
+
+                <button type="button" class="next-btn" onclick="validateAndProceedDesc()">Next: Product Images <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+
+            <!-- ধাপ ৪: ক্লিন ও অপ্টিমাইজড ইমেজ আপলোড এবং ভিডিও লিংক -->
+            <div class="form-card hidden-step" id="step-images-submit">
+                <h3><i class="fa-solid fa-images"></i> Product Images<span class="required-star">*</span></h3>
+                
+                <div class="preview-container" id="image-preview"></div>
+
+                <div class="upload-box" onclick="document.getElementById('file-input').click();">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>Click here to upload product images</p>
+                    <input type="file" id="file-input" name="product_images[]" accept="image/*" multiple style="display: none;" onchange="previewImages(event)">
+                </div>
+
+                <!-- প্রোডাক্ট ভিডিও লিংক (ইমেজের নিচে অপশনাল ফিল্ড) -->
+                <div class="input-group" style="margin-top: 25px;">
+                    <label for="youtube_link">Product Video Link (Optional YouTube URL)</label>
+                    <input type="url" id="youtube_link" name="youtube_link" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+
+                <button type="submit" class="submit-btn" style="margin-top: 15px;"><i class="fa-solid fa-check"></i> Submit & Sync Product</button>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- জাভাস্ক্রিপ্ট সিকোয়েন্স, অটো WebP অপ্টিমাইজেশন ও ভ্যালিডেশন লজিক -->
+    <script>
+        const subCategoriesData = {
+            womens: [
+                {name: "CLOTHING", icon: "fa-solid fa-shirt"},
+                {name: "HANDBAGS", icon: "fa-solid fa-bag-shopping"},
+                {name: "SHOES", icon: "fa-solid fa-shoe-prints"},
+                {name: "JEWELRY", icon: "fa-solid fa-gem"},
+                {name: "WATCHES", icon: "fa-solid fa-clock"},
+                {name: "LINGERIE", icon: "fa-solid fa-heart"},
+                {name: "BEAUTY", icon: "fa-solid fa-spray-can-sparkles"},
+                {name: "ACTIVEWEAR", icon: "fa-solid fa-person-running"},
+                {name: "TRADITIONAL", icon: "fa-solid fa-vest"},
+                {name: "ACCESSORIES", icon: "fa-solid fa-glasses"}
+            ],
+            mens: [
+                {name: "SUITS & BLAZERS", icon: "fa-solid fa-user-tie"},
+                {name: "SHIRTS & POLOS", icon: "fa-solid fa-shirt"},
+                {name: "TRADITIONAL WEAR", icon: "fa-solid fa-vest"},
+                {name: "MEN'S SHOES", icon: "fa-solid fa-socks"},
+                {name: "LUXURY WATCHES", icon: "fa-solid fa-clock"},
+                {name: "WALLETS & BELTS", icon: "fa-solid fa-wallet"},
+                {name: "HEADWEAR", icon: "fa-solid fa-hat-cowboy"},
+                {name: "EYEWEAR", icon: "fa-solid fa-glasses"},
+                {name: "OFFICE BAGS", icon: "fa-solid fa-briefcase"},
+                {name: "ACTIVEWEAR", icon: "fa-solid fa-dumbbell"}
+            ],
+            boys: [
+                {name: "CLOTHING SETS", icon: "fa-solid fa-child"},
+                {name: "T-SHIRTS", icon: "fa-solid fa-shirt"},
+                {name: "FOOTWEAR", icon: "fa-solid fa-socks"},
+                {name: "PARTY WEAR", icon: "fa-solid fa-hat-wizard"},
+                {name: "SPORTSWEAR", icon: "fa-solid fa-baseball-bat-ball"}
+            ],
+            girls: [
+                {name: "PARTY DRESSES", icon: "fa-solid fa-child-dress"},
+                {name: "CASUAL TOPS", icon: "fa-solid fa-shirt"},
+                {name: "FOOTWEAR", icon: "fa-solid fa-shoe-prints"},
+                {name: "HAIR ACCESSORIES", icon: "fa-solid fa-crown"},
+                {name: "MINI HANDBAGS", icon: "fa-solid fa-bag-shopping"},
+                {name: "JEWELRY SETS", icon: "fa-solid fa-gem"},
+                {name: "CAPS & HATS", icon: "fa-solid fa-hat-cowboy"},
+                {name: "SOCKS & TIGHTS", icon: "fa-solid fa-socks"},
+                {name: "ETHNIC WEAR", icon: "fa-solid fa-vest"},
+                {name: "SUNGLASSES", icon: "fa-solid fa-glasses"}
+            ],
+            luxury: [
+                {name: "VIP CORPORATE", icon: "fa-solid fa-briefcase"},
+                {name: "GIFT HAMPERS", icon: "fa-solid fa-gift"},
+                {name: "FINE JEWELRY", icon: "fa-solid fa-gem"},
+                {name: "LUXURY TIMEPIECES", icon: "fa-solid fa-clock"},
+                {name: "CRYSTAL & DECOR", icon: "fa-solid fa-champagne-glasses"},
+                {name: "PERFUMES & SCENTS", icon: "fa-solid fa-spray-can-sparkles"},
+                {name: "LEATHER WALLETS", icon: "fa-solid fa-wallet"},
+                {name: "PERSONALIZED", icon: "fa-solid fa-pen-nib"}
+            ],
+            matching: [
+                {name: "FAMILY OUTFITS", icon: "fa-solid fa-people-group"},
+                {name: "COUPLE SETS", icon: "fa-solid fa-shirt"},
+                {name: "MOM & ME SETS", icon: "fa-solid fa-child-reaching"},
+                {name: "DAD & SON SETS", icon: "fa-solid fa-user-gear"}
+            ],
+            baby: [
+                {name: "BABY CLOTHING", icon: "fa-solid fa-child-reaching"},
+                {name: "STROLLERS & GEAR", icon: "fa-solid fa-baby-carriage"},
+                {name: "FEEDING ESSENTIALS", icon: "fa-solid fa-bottle-water"},
+                {name: "BABY CARE", icon: "fa-solid fa-bath"},
+                {name: "NURSERY & BEDDING", icon: "fa-solid fa-bed"}
+            ]
+        };
+
+        function showSubCategories(element, categoryKey) {
+            document.querySelectorAll('.cat-box').forEach(box => box.classList.remove('clicked'));
+            element.classList.add('clicked');
+
+            setTimeout(() => {
+                document.getElementById('main-categories').style.display = 'none';
+                const subContainer = document.getElementById('sub-categories');
+                subContainer.style.display = 'block';
+
+                const contentDiv = document.getElementById('sub-cat-content');
+                contentDiv.innerHTML = '';
+
+                subCategoriesData[categoryKey].forEach(item => {
+                    const box = document.createElement('div');
+                    box.className = 'cat-box';
+                    box.onclick = () => {
+                        box.classList.add('clicked');
+                        setTimeout(() => selectFinalCategory(item.name), 180);
+                    };
+                    box.innerHTML = `<i class="${item.icon}"></i><span>${item.name}</span>`;
+                    contentDiv.appendChild(box);
+                });
+            }, 180);
+        }
+
+        function backToMainCategories() {
+            document.getElementById('sub-categories').style.display = 'none';
+            document.getElementById('main-categories').style.display = 'grid';
+            document.querySelectorAll('.cat-box').forEach(box => box.classList.remove('clicked'));
+        }
+
+        function selectFinalCategory(categoryName) {
+            document.getElementById('selected_category').value = categoryName;
+            document.getElementById('chosen-cat-text').innerText = categoryName;
+
+            document.getElementById('step-category-card').style.display = 'none';
+            document.getElementById('selection-display').style.display = 'flex';
+            document.getElementById('step-product-info').style.display = 'block';
+        }
+
+        function resetCategorySelection() {
+            document.getElementById('selected_category').value = '';
+            document.getElementById('step-product-info').style.display = 'none';
+            document.getElementById('step-description-custom').style.display = 'none';
+            document.getElementById('step-images-submit').style.display = 'none';
+            document.getElementById('selection-display').style.display = 'none';
+            document.getElementById('step-category-card').style.display = 'block';
+            document.getElementById('sub-categories').style.display = 'none';
+            document.getElementById('main-categories').style.display = 'grid';
+            document.querySelectorAll('.cat-box').forEach(box => box.classList.remove('clicked'));
+        }
+
+        function validateAndProceedInfo() {
+            const pName = document.getElementById('product_name');
+            const sellingPrice = document.getElementById('selling_price');
+            const marketPrice = document.getElementById('market_price');
+            const stock = document.getElementById('stock');
+
+            if(!pName.value || !sellingPrice.value || !marketPrice.value || !stock.value) {
+                alert("Please fill in all required fields correctly.");
+                return;
+            }
+
+            document.getElementById('step-product-info').style.display = 'none';
+            document.getElementById('step-description-custom').style.display = 'block';
+        }
+
+        function validateAndProceedDesc() {
+            const desc = document.getElementById('description');
+            if(!desc.value) {
+                alert("Please enter the Product Description.");
+                return;
+            }
+
+            document.getElementById('step-description-custom').style.display = 'none';
+            document.getElementById('step-images-submit').style.display = 'block';
+        }
+
+        let uploadedImagesList = [];
+        
+        // ব্যাকগ্রাউন্ডে অটো WebP অপ্টিমাইজেশন ও PNG ফলব্যাক প্রসেসর (ক্লিন ইউজার ইন্টারফেস)
+        function previewImages(event) {
+            const previewContainer = document.getElementById('image-preview');
+            previewContainer.innerHTML = ""; 
+            const files = event.target.files;
+            uploadedImagesList = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const imgElement = new Image();
+                    imgElement.src = e.target.result;
+
+                    imgElement.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = imgElement.width;
+                        let height = imgElement.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(imgElement, 0, 0, width, height);
+
+                        let optimizedDataUrl = canvas.toDataURL('image/webp', 0.8);
+                        if (!optimizedDataUrl.startsWith('data:image/webp')) {
+                            optimizedDataUrl = canvas.toDataURL('image/png');
+                        }
+
+                        uploadedImagesList.push(optimizedDataUrl);
+
+                        const card = document.createElement('div');
+                        card.className = 'preview-card';
+                        
+                        const img = document.createElement('img');
+                        img.src = optimizedDataUrl;
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                        deleteBtn.style.cssText = "position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.7); color:#fff; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center;";
+                        
+                        deleteBtn.onclick = function() {
+                            card.remove();
+                            uploadedImagesList = uploadedImagesList.filter(item => item !== optimizedDataUrl);
+                        };
+
+                        card.appendChild(img);
+                        card.appendChild(deleteBtn);
+                        previewContainer.appendChild(card);
+                    };
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProductData(event) {
+            event.preventDefault();
+
+            if (uploadedImagesList.length === 0) {
+                alert("Please upload at least one product image.");
+                return;
+            }
+
+            const productData = {
+                category: document.getElementById('selected_category').value,
+                title: document.getElementById('product_name').value,
+                sellingPrice: document.getElementById('selling_price').value,
+                marketPrice: document.getElementById('market_price').value,
+                intDiscount: document.getElementById('int_discount').value,
+                bdDiscount: document.getElementById('bd_discount').value,
+                stock: document.getElementById('stock').value,
+                description: document.getElementById('description').value,
+                customNotes: document.getElementById('custom_notes').value,
+                youtubeLink: document.getElementById('youtube_link').value,
+                images: uploadedImagesList,
+                chatWithSeller: true,
+                notificationSystem: "active"
+            };
+
+            let existingProducts = JSON.parse(localStorage.getItem('rorraxy_products')) || [];
+            existingProducts.push(productData);
+            localStorage.setItem('rorraxy_products', JSON.stringify(existingProducts));
+
+            alert("Product successfully added and synced with instant seller chat notification!");
+            document.getElementById('productForm').reset();
+            document.getElementById('image-preview').innerHTML = "";
+            resetCategorySelection();
+        }
+    </script>
+
+</body>
+</html>
