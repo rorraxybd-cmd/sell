@@ -244,11 +244,17 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td><strong>${data.productId}</strong><br><span style="color:#888;">${data.productName}</span></td>
-                            <td>$${data.sellingPrice.toFixed(2)}</td>
-                            <td>${data.stock}</td>
-                            <td><span style="color:#4cd137; font-weight:600;">Active</span></td>
+                            <td><button class="chat-seller-btn" onclick="window.showToast('Opening Chat with Seller for ${data.productId}')"><i class="fa-solid fa-comments"></i> Chat with Seller</button></td>
                             <td>
-                                <button onclick="deleteProduct('${data.productId}')" style="background:rgba(255,77,77,0.1); border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.75rem; transition:0.2s;"><i class="fa-solid fa-trash"></i> Delete</button>
+                                <div><strong>Local:</strong> $${data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00'}</div>
+                                <div style="font-size:0.7rem; color:var(--gold-solid);">Intl: $${data.intlPrice ? data.intlPrice.toFixed(2) : (data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00')}</div>
+                            </td>
+                            <td>${data.stock || 0}</td>
+                            <td><div style="max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${data.details || 'N/A'}">${data.details || 'N/A'}</div></td>
+                            <td><span style="font-size:0.7rem; color:#ccc;">${data.customSizeNote || 'None'}</span></td>
+                            <td>
+                                <button onclick="window.showToast('Edit feature for ${data.productId}')" style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:var(--gold-solid); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.7rem; margin-bottom:4px;"><i class="fa-solid fa-pen"></i> Edit</button>
+                                <button onclick="deleteProduct('${data.productId}')" style="background:rgba(255,77,77,0.1); border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.7rem;"><i class="fa-solid fa-trash"></i> Delete</button>
                             </td>
                         `;
                         tbody.appendChild(tr);
@@ -258,7 +264,7 @@
                 document.getElementById('totalProductsCount').innerText = count;
 
                 if(count === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Click any of the product buttons above to list items!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Click any of the product buttons above to list items!</td></tr>`;
                 }
             } catch (e) {
                 console.log("Error loading products:", e);
@@ -341,7 +347,7 @@
         .google-verify-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(255, 255, 255, 0.2); }
 
         #dashboardSection {
-            display: none; width: 100%; max-width: 1050px;
+            display: none; width: 100%; max-width: 1150px;
             margin: 0 auto; padding: 20px 12px;
         }
         .dash-header {
@@ -395,7 +401,6 @@
             opacity: 0.8;
         }
 
-        /* Three Distinct Professional Product Buttons in a Row - Fully Mobile Optimized */
         .product-type-buttons-wrap {
             display: flex;
             justify-content: center;
@@ -433,6 +438,21 @@
             border-color: transparent;
         }
 
+        /* Shipping & Pricing Warning Note Box */
+        .shipping-warning-note {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px dashed var(--gold-solid);
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.76rem;
+            color: #e2e2e2;
+            line-height: 1.5;
+        }
+        .shipping-warning-note strong {
+            color: var(--gold-solid);
+        }
+
         .card-box {
             background: var(--card-bg); 
             border: 1px solid var(--border-color);
@@ -448,9 +468,28 @@
         }
         .card-box-header h3 { margin: 0; font-size: 0.85rem; color: #fff; font-weight: 600; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.76rem; min-width: 450px; }
-        th { color: var(--text-gray); font-weight: 500; padding: 8px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.74rem; min-width: 700px; }
+        th { color: var(--text-gray); font-weight: 500; padding: 10px 8px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; }
+
+        .chat-seller-btn {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid var(--gold-solid);
+            color: var(--gold-solid);
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .chat-seller-btn:hover {
+            background: var(--gold-solid);
+            color: #000;
+        }
 
         #settingsSection { display: none; }
         .settings-container { 
@@ -523,7 +562,6 @@
         .back-cat-btn { background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: 0.2s; }
         .back-cat-btn:hover { background: rgba(212, 175, 55, 0.1); }
 
-        /* Mobile Adjustments for Perfect Responsiveness */
         @media(max-width: 576px) {
             #dashboardSection { padding: 10px 8px; }
             .dash-header { padding-bottom: 10px; margin-bottom: 15px; }
@@ -721,6 +759,12 @@
                 <a href="add-live-product.html" class="product-type-btn"><i class="fa-solid fa-video"></i> Live Add Product</a>
             </div>
 
+            <!-- Shipping & Pricing Note for Sellers -->
+            <div class="shipping-warning-note">
+                <i class="fa-solid fa-triangle-exclamation" style="color: var(--gold-solid); margin-right: 6px;"></i>
+                <strong>গুরুত্বপূর্ণ নোট:</strong> প্রোডাক্ট আপলোড করার সময় অভ্যন্তরীণ (Local যেমন: বাংলাদেশ) এবং ইন্টারন্যাশনাল—উভয় বাজারের কথা ভালোভাবে চিন্তা-ভাবনা করে প্রাইস নির্ধারণ করবেন। আমাদের প্ল্যাটফর্মে সমস্ত প্রোডাক্ট সম্পূর্ণ <strong>ফ্রি শিপিংয়ে (Free Shipping)</strong> দেওয়া হয়। তাই প্রোডাক্ট আপলোড করার সময় শিপিং খরচ, যদি কোনো দেশে ভ্যাট থাকে তা এবং অন্যান্য আনুষঙ্গিক খরচ সম্পূর্ণটাই প্রোডাক্টের প্রাইসের সাথে যোগ করে চূড়ান্ত প্রাইস সেট করতে হবে। এছাড়া আপনি লোকাল ও ইন্টারন্যাশনাল ডিসকাউন্ট প্রাইস ম্যানেজ করতে পারবেন।
+            </div>
+
             <!-- My Store Products Table Section -->
             <div class="card-box">
                 <div class="card-box-header">
@@ -730,15 +774,17 @@
                     <thead>
                         <tr>
                             <th>Product ID / Title</th>
-                            <th>Price</th>
+                            <th>Chat</th>
+                            <th>Price & Discount</th>
                             <th>Stock</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>Details</th>
+                            <th>Custom Size & Note</th>
+                            <th>Actions / Edit</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
                         <tr>
-                            <td colspan="5" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet. Click any of the product buttons above to list items!</td>
+                            <td colspan="7" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet. Click any of the product buttons above to list items!</td>
                         </tr>
                     </tbody>
                 </table>
