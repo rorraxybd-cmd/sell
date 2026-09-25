@@ -193,7 +193,7 @@
                     window.userState.sellerData = { ...window.userState.sellerData, ...updateData };
                 }
                 showSpinner(false);
-                window.showToast("Account Info saved successfully to Firebase!");
+                window.showToast("Account Info saved successfully!");
             } catch(err) {
                 showSpinner(false);
                 window.showToast("Save failed: " + err.message, true);
@@ -293,11 +293,12 @@
                 date: "26 Sep 2026"
             };
 
+            const autoTrackingId = "RRX-" + sampleOrder.orderId.split('-')[1] + "-AUT";
+
             orderTbody.innerHTML = "";
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${sampleOrder.orderId}</strong></td>
-                <td><span style="font-size: 0.72rem; color: var(--text-gray);">${sampleOrder.date}</span></td>
+                <td><strong>${sampleOrder.orderId}</strong><br><span style="font-size: 0.72rem; color: var(--text-gray);">${sampleOrder.date}</span></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
@@ -311,53 +312,44 @@
                     <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat</button>
                 </td>
                 <td>
-                    <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
-                        <select id="trackType_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleTrackTypeChange('${sampleOrder.orderId}')">
-                            <option value="Auto Track" selected>Auto Track</option>
-                            <option value="Manual Track">Manual Track</option>
-                        </select>
-                        <input type="text" id="courierNameInput_${sampleOrder.orderId}" placeholder="Courier Name" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:90px; outline:none; display:none;">
-                        <input type="text" id="trackInput_${sampleOrder.orderId}" placeholder="Enter Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:105px; outline:none;">
-                        <button id="saveTrackBtn_${sampleOrder.orderId}" onclick="saveHybridTracking('${sampleOrder.orderId}')" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold-solid); color:var(--gold-solid); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.68rem; font-weight:600;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                    <div style="background: rgba(212,175,55,0.05); border: 1px dashed var(--gold-solid); padding: 6px 10px; border-radius: 6px; text-align: center; display: inline-block;">
+                        <span style="font-size:0.65rem; color:var(--text-gray);">Auto Track ID</span><br>
+                        <strong style="color:var(--gold-solid); font-size:0.75rem;">${autoTrackingId}</strong>
                     </div>
                 </td>
                 <td>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Shipping</span>
-                        <select id="returnStatus_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:#ff4d4d; padding:3px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleReturnStatusChange('${sampleOrder.orderId}')">
-                            <option value="No Return" selected>No Return</option>
-                            <option value="Return Requested">Return Requested</option>
-                            <option value="Returned Completed">Returned Completed</option>
-                        </select>
+                    <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="courierNameInput_${sampleOrder.orderId}" placeholder="Courier Name" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:5px 8px; border-radius:6px; font-size:0.7rem; width:95px; outline:none;">
+                        <input type="text" id="trackInput_${sampleOrder.orderId}" placeholder="Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:5px 8px; border-radius:6px; font-size:0.7rem; width:100px; outline:none;">
+                        <button id="saveTrackBtn_${sampleOrder.orderId}" onclick="saveManualTracking('${sampleOrder.orderId}')" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold-solid); color:var(--gold-solid); padding:5px 12px; border-radius:6px; cursor:pointer; font-size:0.7rem; font-weight:600; transition: 0.2s;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                     </div>
+                </td>
+                <td style="text-align: center;">
+                    <div id="shippingStatus_${sampleOrder.orderId}" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                        <span style="color: var(--text-gray); font-size: 0.85rem;"><i class="fa-solid fa-box"></i></span>
+                        <span style="color: var(--text-gray); font-size: 0.7rem; font-weight: 500;">Awaiting</span>
+                    </div>
+                </td>
+                <td>
+                    <select id="deliveryReturn_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:5px 8px; border-radius:6px; font-size:0.75rem; outline:none;" onchange="handleDeliveryReturnChange('${sampleOrder.orderId}')">
+                        <option value="In Transit" selected>In Transit</option>
+                        <option value="Delivery">Delivery</option>
+                        <option value="Return">Return</option>
+                    </select>
                 </td>
             `;
             orderTbody.appendChild(tr);
             document.getElementById('totalOrdersCount').innerText = "1";
         }
 
-        window.handleTrackTypeChange = function(orderId) {
-            const trackType = document.getElementById('trackType_' + orderId).value;
-            const courierInput = document.getElementById('courierNameInput_' + orderId);
-            const input = document.getElementById('trackInput_' + orderId);
-            if(trackType === 'Auto Track') {
-                courierInput.style.display = 'none';
-                input.placeholder = "Auto Generated ID";
-            } else {
-                courierInput.style.display = 'inline-block';
-                input.placeholder = "Tracking ID";
-            }
-        }
-
-        window.saveHybridTracking = function(orderId) {
-            const trackVal = document.getElementById('trackInput_' + orderId).value.trim();
-            const trackType = document.getElementById('trackType_' + orderId).value;
+        window.saveManualTracking = function(orderId) {
             const courierName = document.getElementById('courierNameInput_' + orderId).value.trim();
+            const trackVal = document.getElementById('trackInput_' + orderId).value.trim();
             const btn = document.getElementById('saveTrackBtn_' + orderId);
-            const shippingStatusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
+            const shippingStatusDiv = document.getElementById('shippingStatus_' + orderId);
 
-            if(trackType === 'Manual Track' && (!courierName || !trackVal)) {
-                window.showToast("দয়া করে কুরিয়ারের নাম এবং ট্র্যাকিং আইডি উভয়ই লিখুন!", true);
+            if(!courierName || !trackVal) {
+                window.showToast("দয়া করে কুরিয়ারের নাম এবং ম্যানুয়াল ট্র্যাকিং আইডি উভয়ই লিখুন!", true);
                 return;
             }
 
@@ -365,10 +357,13 @@
             btn.style.background = "var(--gold-solid)";
             btn.style.color = "#000";
 
-            shippingStatusSpan.innerText = "Shipping & Ready to Deliver";
-            shippingStatusSpan.style.color = "var(--gold-solid)";
+            // Update Shipping Status to Tick Mark
+            shippingStatusDiv.innerHTML = `
+                <span style="color: var(--gold-solid); font-size: 1rem;"><i class="fa-solid fa-circle-check"></i></span>
+                <span style="color: var(--gold-solid); font-size: 0.75rem; font-weight: 600;">Shipped</span>
+            `;
 
-            window.showToast(`Tracking (${trackType}) saved successfully! Status moved to Shipping.`);
+            window.showToast("Tracking saved successfully! Product moved to Shipped.");
 
             setTimeout(() => {
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save`;
@@ -377,16 +372,21 @@
             }, 3000);
         }
 
-        window.handleReturnStatusChange = function(orderId) {
-            const val = document.getElementById('returnStatus_' + orderId).value;
-            const statusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
-            if(val !== 'No Return') {
-                statusSpan.innerText = val;
-                statusSpan.style.color = "#ff4d4d";
-                window.showToast("Order status updated: " + val, true);
+        window.handleDeliveryReturnChange = function(orderId) {
+            const val = document.getElementById('deliveryReturn_' + orderId).value;
+            const selectEl = document.getElementById('deliveryReturn_' + orderId);
+            
+            if(val === 'Return') {
+                selectEl.style.color = "#ff4d4d";
+                selectEl.style.borderColor = "#ff4d4d";
+                window.showToast("Order marked as Return.", true);
+            } else if (val === 'Delivery') {
+                selectEl.style.color = "var(--gold-solid)";
+                selectEl.style.borderColor = "var(--gold-solid)";
+                window.showToast("Order marked as Delivered!");
             } else {
-                statusSpan.innerText = "Shipping & Ready to Deliver";
-                statusSpan.style.color = "var(--gold-solid)";
+                selectEl.style.color = "#fff";
+                selectEl.style.borderColor = "var(--border-color)";
             }
         }
 
@@ -405,8 +405,8 @@
         }
 
         window.openChatBox = function(targetId) {
-            document.getElementById('chatModalTitle').innerText = "Live Chat - Target: " + targetId;
-            document.getElementById('chatMessagesBody').innerHTML = `<div style="text-align: left; margin-bottom: 8px;"><span style="background: #1d1d22; color: #ccc; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">Hello seller, I have a query regarding order ${targetId}!</span></div>`;
+            document.getElementById('chatModalTitle').innerText = "Live Chat - Order: " + targetId;
+            document.getElementById('chatMessagesBody').innerHTML = ``;
             document.getElementById('chatModalOverlay').style.display = 'flex';
         }
 
@@ -422,7 +422,6 @@
             body.innerHTML += `<div style="text-align: right; margin-bottom: 8px;"><span style="background: var(--gold-solid); color: #000; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">${msg}</span></div>`;
             input.value = "";
             body.scrollTop = body.scrollHeight;
-            window.showToast("Message sent to customer!");
         }
 
         window.requestPayoutAction = function() {
@@ -657,7 +656,7 @@
             width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; min-width: 950px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; min-width: 1050px; }
         th { color: var(--text-gray); font-weight: 500; padding: 10px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; white-space: nowrap; }
 
@@ -907,16 +906,17 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Date</th>
+                                <th>Order ID & Date</th>
                                 <th>Product Info</th>
                                 <th>Chat Option</th>
-                                <th>Tracking (Auto / Manual)</th>
-                                <th>Shipping & Delivery / Return</th>
+                                <th>Processing (Auto ID)</th>
+                                <th>Manual Tracking</th>
+                                <th style="text-align: center;">Shipping</th>
+                                <th>Delivery / Return</th>
                             </tr>
                         </thead>
                         <tbody id="orderTableBody">
-                            <tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;">Loading incoming order sample...</td></tr>
+                            <tr><td colspan="7" style="text-align: center; color: #777; padding: 20px;">Loading incoming order sample...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -995,34 +995,6 @@
                                     <option value="+44">🇬🇧 +44 (UK)</option>
                                     <option value="+91">🇮🇳 +91 (IN)</option>
                                     <option value="+971">🇦🇪 +971 (UAE)</option>
-                                    <option value="+966">🇸🇦 +966 (KSA)</option>
-                                    <option value="+65">🇸🇬 +65 (SG)</option>
-                                    <option value="+60">🇲🇾 +60 (MY)</option>
-                                    <option value="+61">🇦🇺 +61 (AU)</option>
-                                    <option value="+49">🇩🇪 +49 (DE)</option>
-                                    <option value="+33">🇫🇷 +33 (FR)</option>
-                                    <option value="+81">🇯🇵 +81 (JP)</option>
-                                    <option value="+86">🇨🇳 +86 (CN)</option>
-                                    <option value="+7">🇷🇺 +7 (RU)</option>
-                                    <option value="+39">🇮🇹 +39 (IT)</option>
-                                    <option value="+34">🇪🇸 +34 (ES)</option>
-                                    <option value="+55">🇧🇷 +55 (BR)</option>
-                                    <option value="+27">🇿🇦 +27 (ZA)</option>
-                                    <option value="+20">🇪🇬 +20 (EG)</option>
-                                    <option value="+92">🇵🇰 +92 (PK)</option>
-                                    <option value="+886">🇹🇼 +886 (TW)</option>
-                                    <option value="+82">🇰🇷 +82 (KR)</option>
-                                    <option value="+31">🇳🇱 +31 (NL)</option>
-                                    <option value="+46">🇸🇪 +46 (SE)</option>
-                                    <option value="+41">🇨🇭 +41 (CH)</option>
-                                    <option value="+64">🇳🇿 +64 (NZ)</option>
-                                    <option value="+52">🇲🇽 +52 (MX)</option>
-                                    <option value="+54">🇦🇷 +54 (AR)</option>
-                                    <option value="+90">🇹🇷 +90 (TR)</option>
-                                    <option value="+62">🇮🇩 +62 (ID)</option>
-                                    <option value="+63">🇵🇭 +63 (PH)</option>
-                                    <option value="+84">🇻🇳 +84 (VN)</option>
-                                    <option value="+66">🇹🇭 +66 (TH)</option>
                                 </select>
                                 <input type="text" id="whatsappInput" placeholder="17XXXXXXXX" required style="flex: 1;">
                             </div>
