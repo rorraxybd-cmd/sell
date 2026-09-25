@@ -134,6 +134,9 @@
             }
 
             window.userState.sellerId = finalSellerId;
+            localStorage.setItem('rorraxy_active_seller_id', finalSellerId);
+            localStorage.setItem('rorraxy_active_seller_uid', user.uid);
+
             document.getElementById('storeFullName').value = user.displayName || "";
             document.getElementById('storeNameInput').value = "MR MASUDAR ENTERPRISE";
             document.getElementById('userDisplayEmail').value = user.email || "";
@@ -240,12 +243,12 @@
                         count++;
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td><strong>${data.productId}</strong><br><span style="color:#aaa;">${data.productName}</span></td>
+                            <td><strong>${data.productId}</strong><br><span style="color:#888;">${data.productName}</span></td>
                             <td>$${data.sellingPrice.toFixed(2)}</td>
                             <td>${data.stock}</td>
                             <td><span style="color:#4cd137; font-weight:600;">Active</span></td>
                             <td>
-                                <button onclick="deleteProduct('${data.productId}')" style="background:rgba(255,77,77,0.15); border:1px solid #ff4d4d; color:#ff4d4d; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
+                                <button onclick="deleteProduct('${data.productId}')" style="background:rgba(255,77,77,0.1); border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.75rem; transition:0.2s;"><i class="fa-solid fa-trash"></i> Delete</button>
                             </td>
                         `;
                         tbody.appendChild(tr);
@@ -255,7 +258,7 @@
                 document.getElementById('totalProductsCount').innerText = count;
 
                 if(count === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #666; padding: 20px;">No products uploaded yet. Click 'Add New Product' to list items!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Click any of the product buttons above to list items!</td></tr>`;
                 }
             } catch (e) {
                 console.log("Error loading products:", e);
@@ -266,13 +269,16 @@
     <style>
         :root {
             --bg-retail: #050505;
-            --card-bg: #111111;
-            --border-color: #222222;
+            --card-bg: #101012;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(212, 175, 55, 0.3);
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             --gold-solid: #d4af37;
             --text-white: #ffffff;
-            --text-gray: #a0a0a0;
+            --text-gray: #999999;
             --font-main: 'Poppins', sans-serif;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         html, body { 
@@ -294,9 +300,9 @@
             align-items: center; justify-content: center; z-index: 99999;
         }
 
-        .spinner-logo { width: 80px; height: auto; object-fit: contain; margin-bottom: 15px; }
+        .spinner-logo { width: 70px; height: auto; object-fit: contain; margin-bottom: 15px; }
         .spinner-bar {
-            width: 140px; height: 3px; background: #1a1a1a;
+            width: 120px; height: 3px; background: #1a1a1c;
             border-radius: 4px; overflow: hidden; position: relative;
         }
         .spinner-bar::before {
@@ -309,7 +315,7 @@
             100% { left: 100%; }
         }
         .spinner-text {
-            font-size: 0.75rem; letter-spacing: 2px; color: #888;
+            font-size: 0.7rem; letter-spacing: 2px; color: var(--text-gray);
             margin-top: 12px; text-transform: uppercase; font-weight: 500;
         }
 
@@ -318,100 +324,142 @@
             flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; text-align: center;
         }
-        .seller-logo-img { width: 120px; height: auto; object-fit: contain; margin-bottom: 20px; }
+        .seller-logo-img { width: 100px; height: auto; object-fit: contain; margin-bottom: 20px; }
         .seller-sub-title {
-            font-size: 1.2rem; font-weight: 700;
+            font-size: 1.1rem; font-weight: 700;
             background: var(--gold-gradient);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 25px; text-transform: uppercase;
         }
         .google-verify-btn {
             background: #ffffff; color: #000000; font-weight: 700;
-            font-size: 0.82rem; padding: 12px 22px; border-radius: 30px;
+            font-size: 0.78rem; padding: 12px 20px; border-radius: 30px;
             border: none; display: inline-flex; align-items: center; justify-content: center;
-            gap: 10px; cursor: pointer; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
-            transition: 0.2s ease; text-transform: uppercase; max-width: 320px; width: 100%;
+            gap: 10px; cursor: pointer; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+            transition: 0.2s ease; text-transform: uppercase; max-width: 300px; width: 100%;
         }
+        .google-verify-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(255, 255, 255, 0.2); }
 
         #dashboardSection {
-            display: none; width: 100%; max-width: 1100px;
-            margin: 0 auto; padding: 20px 15px;
+            display: none; width: 100%; max-width: 1050px;
+            margin: 0 auto; padding: 20px 12px;
         }
         .dash-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-color); padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 15px;
             margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
         }
-        .dash-logo-area { display: flex; align-items: center; gap: 10px; }
-        .dash-logo-img { width: 48px; height: 48px; object-fit: cover; border-radius: 50%; border: 2px solid var(--gold-solid); cursor: pointer; }
-        .user-big-identity h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #ffffff; }
+        .dash-logo-area { display: flex; align-items: center; gap: 12px; }
+        .dash-logo-img { width: 44px; height: 44px; object-fit: cover; border-radius: 50%; border: 2px solid var(--gold-solid); cursor: pointer; transition: 0.2s; }
+        .dash-logo-img:hover { transform: scale(1.05); }
+        .user-big-identity h2 { margin: 0; font-size: 0.95rem; font-weight: 700; color: #ffffff; }
         .user-big-identity p {
-            margin: 2px 0 0 0; font-size: 0.75rem;
+            margin: 2px 0 0 0; font-size: 0.72rem;
             background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-weight: 600;
         }
         .header-right-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .nav-tab-btn {
-            background: #ffffff; color: #000000; border: none;
-            padding: 8px 14px; border-radius: 18px; cursor: pointer;
-            font-size: 0.78rem; font-weight: 700; transition: 0.2s;
-            display: inline-flex; align-items: center; gap: 5px;
+            background: #18181c; color: var(--text-gray); border: 1px solid var(--border-color);
+            padding: 8px 14px; border-radius: 20px; cursor: pointer;
+            font-size: 0.75rem; font-weight: 600; transition: 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
         }
-        .nav-tab-btn.active { background: var(--gold-gradient); color: #000; }
+        .nav-tab-btn.active { background: var(--gold-gradient); color: #000; font-weight: 700; border-color: transparent; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
 
         .summary-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 12px; margin-bottom: 20px;
         }
         .summary-card {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; position: relative;
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 14px; 
+            padding: 16px; 
+            position: relative;
+            box-shadow: var(--card-shadow);
+            transition: 0.2s ease;
         }
-        .summary-card h3 { margin: 0 0 6px 0; font-size: 0.72rem; color: #888; text-transform: uppercase; }
+        .summary-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        .summary-card h3 { margin: 0 0 6px 0; font-size: 0.7rem; color: var(--text-gray); text-transform: uppercase; font-weight: 500; }
         .summary-card .value {
-            margin: 0; font-size: 1.4rem; font-weight: 700;
+            margin: 0; font-size: 1.3rem; font-weight: 700;
             background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .summary-card .gold-icon {
-            position: absolute; right: 15px; top: 16px; font-size: 1.3rem;
+            position: absolute; right: 15px; top: 16px; font-size: 1.2rem;
             background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0.8;
         }
 
-        /* Center Add New Product Button Section */
-        .add-product-center-wrap {
+        /* Three Distinct Professional Product Buttons in a Row - Fully Mobile Optimized */
+        .product-type-buttons-wrap {
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 10px;
             margin: 20px 0 25px 0;
+            flex-wrap: wrap;
         }
-        .add-product-btn-big {
-            background: var(--gold-gradient); color: #000; border: none;
-            padding: 12px 28px; border-radius: 25px; font-size: 0.85rem; font-weight: 700;
-            cursor: pointer; text-transform: uppercase; text-decoration: none; 
-            display: inline-flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+        .product-type-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--gold-solid);
+            color: #ffffff;
+            padding: 11px 16px;
+            border-radius: 25px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             transition: 0.2s ease;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
         }
-        .add-product-btn-big:hover {
+        .product-type-btn:hover {
+            background: var(--gold-gradient);
+            color: #000;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+            border-color: transparent;
         }
 
         .card-box {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; margin-bottom: 16px; overflow-x: auto;
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 14px; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            overflow-x: auto;
+            box-shadow: var(--card-shadow);
         }
         .card-box-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 12px;
         }
+        .card-box-header h3 { margin: 0; font-size: 0.85rem; color: #fff; font-weight: 600; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem; min-width: 450px; }
-        th { color: #777; font-weight: 500; padding: 8px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #ccc; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.76rem; min-width: 450px; }
+        th { color: var(--text-gray); font-weight: 500; padding: 8px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; }
 
         #settingsSection { display: none; }
-        .settings-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; }
+        .settings-container { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 14px; 
+            padding: 16px; 
+            box-shadow: var(--card-shadow);
+        }
         
         .settings-top-actions {
             display: flex; justify-content: space-between; align-items: center;
@@ -423,45 +471,67 @@
         @media(min-width: 768px) { .settings-nav-tabs { grid-template-columns: repeat(4, 1fr); } }
 
         .sub-tab-btn {
-            background: #ffffff; border: 1px solid var(--border-color); color: #000000;
-            padding: 10px 8px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700;
+            background: #141417; border: 1px solid var(--border-color); color: var(--text-gray);
+            padding: 10px 8px; border-radius: 10px; cursor: pointer; font-size: 0.73rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center; gap: 5px; text-align: center;
             width: 100%; transition: 0.2s;
         }
-        .sub-tab-btn.active { background: var(--gold-gradient); color: #000; border-color: transparent; }
+        .sub-tab-btn.active { background: var(--gold-gradient); color: #000; border-color: transparent; font-weight: 700; box-shadow: 0 4px 12px rgba(212,175,55,0.25); }
 
         .sub-tab-content { display: none; }
         .sub-tab-content.active { display: block; }
 
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+        .form-group label { display: block; font-size: 0.73rem; color: var(--text-gray); margin-bottom: 4px; font-weight: 500; }
         .form-group input, .form-group select {
-            width: 100%; background: #080808; border: 1px solid #333;
-            border-radius: 7px; padding: 9px 11px; color: #fff; font-size: 0.82rem; outline: none;
+            width: 100%; background: #08080a; border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 0.8rem; outline: none; transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--gold-solid);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
         }
         .save-btn {
             background: var(--gold-gradient); color: #000; border: none; font-weight: 700;
-            padding: 10px 20px; border-radius: 7px; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 0.8rem;
+            padding: 11px 20px; border-radius: 8px; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 0.78rem;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); transition: 0.2s;
         }
+        .save-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
 
         .logo-edit-box {
-            background: #15151a; border: 1px dashed var(--gold-solid); border-radius: 10px;
-            padding: 12px; margin-bottom: 18px; display: flex; align-items: center; gap: 15px;
+            background: #141417; border: 1px dashed var(--border-hover); border-radius: 12px;
+            padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
         }
-        .logo-edit-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-solid); }
+        .logo-edit-box img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-solid); }
 
         .payout-request-box {
-            background: #15151a; border: 1px solid var(--border-color); border-radius: 12px;
-            padding: 20px; margin-top: 20px; text-align: center;
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 14px;
+            padding: 18px; 
+            margin-top: 20px; 
+            text-align: center;
+            box-shadow: var(--card-shadow);
         }
 
         #toastBox {
-            position: fixed; bottom: 25px; right: 25px; background: #1a1a1a;
+            position: fixed; bottom: 20px; right: 20px; background: #141417;
             border: 1px solid var(--gold-solid); color: #fff; padding: 12px 18px;
-            border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 9999; display: none; font-size: 0.8rem; font-weight: 600;
+            border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); z-index: 9999; display: none; font-size: 0.78rem; font-weight: 600;
         }
         
-        .back-cat-btn { background: #15151a; border: none; color: var(--gold-solid); padding: 8px 14px; border-radius: 7px; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+        .back-cat-btn { background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: 0.2s; }
+        .back-cat-btn:hover { background: rgba(212, 175, 55, 0.1); }
+
+        /* Mobile Adjustments for Perfect Responsiveness */
+        @media(max-width: 576px) {
+            #dashboardSection { padding: 10px 8px; }
+            .dash-header { padding-bottom: 10px; margin-bottom: 15px; }
+            .product-type-buttons-wrap { flex-direction: column; gap: 8px; }
+            .product-type-btn { width: 100%; min-width: unset; }
+            .summary-card { padding: 12px; }
+            .summary-card .value { font-size: 1.1rem; }
+        }
     </style>
 
     <script>
@@ -489,8 +559,8 @@
                         const otpauthUrl = "otpauth://totp/rorraxy:seller?secret=JBSWY3DPEHPK3PXP&issuer=rorraxy";
                         new QRCode(qrContainer, {
                             text: otpauthUrl,
-                            width: 130,
-                            height: 130,
+                            width: 120,
+                            height: 120,
                             colorDark : "#000000",
                             colorLight : "#ffffff",
                             correctLevel : QRCode.CorrectLevel.H
@@ -513,8 +583,8 @@
                         const otpauthUrl = "otpauth://totp/rorraxy:seller?secret=JBSWY3DPEHPK3PXP&issuer=rorraxy";
                         new QRCode(qrContainer, {
                             text: otpauthUrl,
-                            width: 130,
-                            height: 130,
+                            width: 120,
+                            height: 120,
                             colorDark : "#000000",
                             colorLight : "#ffffff",
                             correctLevel : QRCode.CorrectLevel.H
@@ -602,7 +672,6 @@
 
     <div id="toastBox"></div>
 
-    <!-- Login Section: Brand name removed, only Become a Seller title -->
     <div id="loginSection" style="display: none;">
         <img src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="seller-logo-img">
         <h1 class="seller-sub-title">Become a Seller</h1>
@@ -620,7 +689,6 @@
                     <p id="headerUserId">ID: loading...</p>
                 </div>
             </div>
-            <!-- Header Right Actions: Logout red button removed completely -->
             <div class="header-right-actions">
                 <button id="btnTabDash" class="nav-tab-btn active" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
                 <button id="btnTabSet" class="nav-tab-btn" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
@@ -630,7 +698,7 @@
         <div id="mainDashboardContent">
             <div class="summary-grid">
                 <div class="summary-card">
-                    <h3>Total Sales Revenue</h3>
+                    <h3>Total Revenue</h3>
                     <p class="value">$0.00</p>
                     <i class="fa-solid fa-wallet gold-icon"></i>
                 </div>
@@ -646,9 +714,11 @@
                 </div>
             </div>
 
-            <!-- Add New Product Button placed nicely at the center right after stats cards -->
-            <div class="add-product-center-wrap">
-                <a href="add-product.html" class="add-product-btn-big"><i class="fa-solid fa-plus"></i> Add New Product</a>
+            <!-- Three Distinct Add Product Buttons in a Row -->
+            <div class="product-type-buttons-wrap">
+                <a href="add-retail-product.html" class="product-type-btn"><i class="fa-solid fa-store"></i> Retail Add Product</a>
+                <a href="add-wholesale-product.html" class="product-type-btn"><i class="fa-solid fa-boxes-stacked"></i> Wholesale Add Product</a>
+                <a href="add-live-product.html" class="product-type-btn"><i class="fa-solid fa-video"></i> Live Add Product</a>
             </div>
 
             <!-- My Store Products Table Section -->
@@ -668,19 +738,19 @@
                     </thead>
                     <tbody id="productTableBody">
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #666; padding: 20px;">No products uploaded yet. Click 'Add New Product' to list items!</td>
+                            <td colspan="5" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet. Click any of the product buttons above to list items!</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Request Payout Section moved completely to the bottom -->
+            <!-- Request Payout Section -->
             <div class="payout-request-box">
-                <h3 style="color: var(--gold-solid); font-size: 0.95rem; margin-top:0; margin-bottom: 10px;"><i class="fa-solid fa-money-check-dollar"></i> Request Payout</h3>
-                <p style="color: var(--text-gray); font-size: 0.78rem; margin-bottom: 15px;">Withdraw your available earnings directly to your configured payout method.</p>
-                <div style="display: flex; gap: 10px; max-width: 400px; margin: 0 auto;">
-                    <input type="number" step="0.01" id="payoutRequestAmount" placeholder="Enter Amount ($)" style="flex: 1; background: #080808; border: 1px solid #333; border-radius: 8px; padding: 10px; color: #fff; outline: none; font-size: 0.85rem;">
-                    <button type="button" class="add-product-btn-big" style="padding: 10px 18px; font-size: 0.75rem;" onclick="requestPayoutAction()">Request Payout</button>
+                <h3 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0; margin-bottom: 8px;"><i class="fa-solid fa-money-check-dollar"></i> Request Payout</h3>
+                <p style="color: var(--text-gray); font-size: 0.75rem; margin-bottom: 14px;">Withdraw your available earnings directly to your configured payout method.</p>
+                <div style="display: flex; gap: 10px; max-width: 380px; margin: 0 auto; flex-wrap: wrap;">
+                    <input type="number" step="0.01" id="payoutRequestAmount" placeholder="Enter Amount ($)" style="flex: 1; min-width: 180px; background: #08080a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; outline: none; font-size: 0.8rem;">
+                    <button type="button" class="product-type-btn" style="padding: 10px 16px; font-size: 0.74rem; border-radius: 8px; min-width: unset; flex: unset;" onclick="requestPayoutAction()">Request</button>
                 </div>
             </div>
         </div>
@@ -690,16 +760,16 @@
                 
                 <div class="settings-top-actions">
                     <button type="button" class="back-cat-btn" onclick="switchTab('dashboard')" style="margin:0;"><i class="fa-solid fa-arrow-left"></i> BACK TO DASHBOARD</button>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--gold-solid);">Seller Settings</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--gold-solid);">Seller Settings</span>
                 </div>
 
                 <div class="logo-edit-box">
                     <img id="currentLogoPreview" src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo">
-                    <div style="flex: 1;">
-                        <h4 style="margin:0 0 3px 0; color:var(--gold-solid); font-size:0.85rem;">Store Logo Branding</h4>
-                        <p style="margin:0; font-size:0.72rem; color:#888;">Upload your custom store avatar or logo.</p>
+                    <div style="flex: 1; min-width: 150px;">
+                        <h4 style="margin:0 0 2px 0; color:var(--gold-solid); font-size:0.82rem;">Store Logo Branding</h4>
+                        <p style="margin:0; font-size:0.7rem; color:var(--text-gray);">Upload your custom store avatar or logo.</p>
                     </div>
-                    <button type="button" class="add-product-btn-big" style="padding: 8px 14px; font-size: 0.75rem;" onclick="document.getElementById('logoFileInput').click()">Change Logo</button>
+                    <button type="button" class="product-type-btn" style="padding: 8px 14px; font-size: 0.73rem; border-radius: 8px; min-width: unset; flex: unset;" onclick="document.getElementById('logoFileInput').click()">Change Logo</button>
                     <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="updateStoreLogo(event)">
                 </div>
 
@@ -712,7 +782,7 @@
 
                 <div id="tabAccount" class="sub-tab-content active" style="margin-top: 15px;">
                     <form onsubmit="saveAccountForm(event)">
-                        <h4 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0;">Seller Full Profile & Store Information</h4>
+                        <h4 style="color: var(--gold-solid); font-size: 0.86rem; margin-top:0;">Seller Full Profile & Store Information</h4>
                         
                         <div class="form-group">
                             <label>Full Name</label>
@@ -726,7 +796,7 @@
 
                         <div class="form-group">
                             <label>Gmail Account (Read-only)</label>
-                            <input type="email" id="userDisplayEmail" readonly style="color: #d4af37; background: #0c0c0c; cursor: not-allowed;">
+                            <input type="email" id="userDisplayEmail" readonly style="color: var(--gold-solid); background: #0c0c0e; cursor: not-allowed;">
                         </div>
 
                         <div class="form-group">
@@ -740,13 +810,13 @@
                         </div>
 
                         <div class="form-group">
-                            <label>WhatsApp Business Number (195+ Country Codes)</label>
+                            <label>WhatsApp Business Number</label>
                             <div style="display: flex; gap: 8px;">
-                                <select id="countryCodeSelect" style="width: 130px; min-width: 110px;">
-                                    <option value="+93">🇦🇫 +93 Afghanistan</option>
-                                    <option value="+880" selected>🇧🇩 +880 Bangladesh</option>
-                                    <option value="+1">🇺🇸 +1 United States</option>
-                                    <option value="+44">🇬🇧 +44 United Kingdom</option>
+                                <select id="countryCodeSelect" style="width: 120px; min-width: 100px;">
+                                    <option value="+93">🇦🇫 +93</option>
+                                    <option value="+880" selected>🇧🇩 +880</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
                                 </select>
                                 <input type="text" id="whatsappInput" placeholder="17XXXXXXXX" required style="flex: 1;">
                             </div>
@@ -758,7 +828,7 @@
 
                 <div id="tabPayment" class="sub-tab-content">
                     <form onsubmit="event.preventDefault(); window.showToast('Payment Setup updated successfully!');">
-                        <h4 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0;">Configure Payout Destination</h4>
+                        <h4 style="color: var(--gold-solid); font-size: 0.86rem; margin-top:0;">Configure Payout Destination</h4>
                         <div class="form-group">
                             <label>Select Preferred Gateway</label>
                             <select id="settingPayoutMethod" onchange="handlePayoutMethodChange()" required>
@@ -776,21 +846,21 @@
 
                 <div id="tabPin" class="sub-tab-content">
                     <form onsubmit="savePinForm(event)">
-                        <h4 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0;">Change Withdrawal PIN</h4>
+                        <h4 style="color: var(--gold-solid); font-size: 0.86rem; margin-top:0;">Change Withdrawal PIN</h4>
                         <div class="form-group" style="position: relative;">
                             <label>Current PIN</label>
                             <input type="password" id="oldPinInput" placeholder="••••••••" minlength="6" maxlength="8" required>
-                            <i id="eyeIconOld" class="fa-solid fa-eye" onclick="toggleVisibility('oldPinInput', 'eyeIconOld')" style="position: absolute; right: 15px; top: 32px; color: #888; cursor: pointer;"></i>
+                            <i id="eyeIconOld" class="fa-solid fa-eye" onclick="toggleVisibility('oldPinInput', 'eyeIconOld')" style="position: absolute; right: 15px; top: 31px; color: #888; cursor: pointer;"></i>
                         </div>
                         <div class="form-group" style="position: relative;">
                             <label>New PIN</label>
                             <input type="password" id="pinInput1" placeholder="••••••••" minlength="6" maxlength="8" required>
-                            <i id="eyeIcon1" class="fa-solid fa-eye" onclick="toggleVisibility('pinInput1', 'eyeIcon1')" style="position: absolute; right: 15px; top: 32px; color: #888; cursor: pointer;"></i>
+                            <i id="eyeIcon1" class="fa-solid fa-eye" onclick="toggleVisibility('pinInput1', 'eyeIcon1')" style="position: absolute; right: 15px; top: 31px; color: #888; cursor: pointer;"></i>
                         </div>
                         <div class="form-group" style="position: relative;">
                             <label>Confirm New PIN</label>
                             <input type="password" id="pinInput2" placeholder="••••••••" minlength="6" maxlength="8" required>
-                            <i id="eyeIcon2" class="fa-solid fa-eye" onclick="toggleVisibility('pinInput2', 'eyeIcon2')" style="position: absolute; right: 15px; top: 32px; color: #888; cursor: pointer;"></i>
+                            <i id="eyeIcon2" class="fa-solid fa-eye" onclick="toggleVisibility('pinInput2', 'eyeIcon2')" style="position: absolute; right: 15px; top: 31px; color: #888; cursor: pointer;"></i>
                         </div>
                         <button type="submit" class="save-btn">Update PIN</button>
                     </form>
@@ -799,7 +869,7 @@
                 <div id="tab2FA" class="sub-tab-content">
                     <div id="twoFaActiveForm">
                         <form onsubmit="verifyAndEnable2FA(event)">
-                            <h4 style="color: var(--gold-solid); font-size: 0.9rem; margin-top:0;">Google Authenticator 2FA</h4>
+                            <h4 style="color: var(--gold-solid); font-size: 0.86rem; margin-top:0;">Google Authenticator 2FA</h4>
                             <div style="display: flex; justify-content: center; margin: 15px 0;">
                                 <div style="background: #fff; padding: 10px; border-radius: 10px; display: inline-flex;">
                                     <div id="qrcodeContainer"></div>
