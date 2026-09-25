@@ -40,7 +40,7 @@
         });
 
         const secretKeyBase32 = "JBSWY3DPEHPK3PXP";
-        window.userState = { firebaseUser: null, sellerId: "", isOnboarded: false };
+        window.userState = { firebaseUser: null, sellerId: "" };
 
         window.showToast = function(message, isError = false) {
             const toast = document.getElementById('toastBox');
@@ -77,14 +77,12 @@
             window.userState.firebaseUser = user;
             const sellerRef = doc(db, "sellers", user.uid);
             let finalSellerId = "";
-            let isOnboarded = false;
 
             try {
                 const sellerSnap = await getDoc(sellerRef);
                 if (sellerSnap.exists() && sellerSnap.data().sellerId) {
                     finalSellerId = sellerSnap.data().sellerId;
                     const data = sellerSnap.data();
-                    isOnboarded = data.isOnboarded || false;
                     document.getElementById('storeFullName').value = data.fullName || user.displayName || "";
                     document.getElementById('storeNameInput').value = data.storeName || "";
                     document.getElementById('personalAddressInput').value = data.personalAddress || "";
@@ -115,7 +113,6 @@
                         photoURL: user.photoURL,
                         role: "seller",
                         status: "active",
-                        isOnboarded: false,
                         createdAt: new Date().toISOString()
                     }, { merge: true });
                 }
@@ -124,7 +121,6 @@
             }
 
             window.userState.sellerId = finalSellerId;
-            window.userState.isOnboarded = isOnboarded;
             localStorage.setItem('rorraxy_active_seller_id', finalSellerId);
 
             document.getElementById('storeFullName').value = user.displayName || "";
@@ -144,14 +140,7 @@
 
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
-            
-            // Check onboarding state
-            if (!isOnboarded) {
-                openMandatoryOnboardingModal();
-            } else {
-                closeMandatoryOnboardingModal();
-            }
-
+            showView('overview');
             showSpinner(false);
         }
 
@@ -197,13 +186,11 @@
                 if(user) {
                     const sellerRef = doc(db, "sellers", user.uid);
                     await setDoc(sellerRef, {
-                        fullName, storeName, personalAddress, warehouseAddress, countryCode, whatsapp, isOnboarded: true
+                        fullName, storeName, personalAddress, warehouseAddress, countryCode, whatsapp
                     }, { merge: true });
                 }
-                window.userState.isOnboarded = true;
-                closeMandatoryOnboardingModal();
                 showSpinner(false);
-                window.showToast("Account Info & Onboarding completed successfully!");
+                window.showToast("Account Info saved successfully to Firebase!");
             } catch(err) {
                 showSpinner(false);
                 window.showToast("Save failed: " + err.message, true);
@@ -297,9 +284,9 @@
                 orderId: "ORD-92814", 
                 item: "Gamar Wood Center Table", 
                 qty: 1, 
+                amount: "$120.00", 
                 img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png",
-                details: "Custom handcrafted Gamar wood center table. Processing duration timeline: 7 Days max.",
-                processingDate: "Processing Date: Oct 24, 2026 (7 Days Timeline)"
+                details: "High-end Gamar wood center table with Golden Teak finish. Premium handcrafted quality."
             };
 
             orderTbody.innerHTML = "";
@@ -308,72 +295,81 @@
                 <td><strong>${sampleOrder.orderId}</strong></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
+                        <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
                         <div>
-                            <strong style="cursor: pointer; color: var(--gold-solid);" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.img}', '${sampleOrder.details}')">${sampleOrder.item}</strong><br>
-                            <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${sampleOrder.qty} | <button onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.img}', '${sampleOrder.details}')" style="background:none; border:none; color:var(--gold-solid); cursor:pointer; padding:0; font-size:0.68rem; text-decoration:underline;">View Details</button></span>
+                            <strong style="cursor: pointer; color: var(--gold-solid);" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')">${sampleOrder.item}</strong><br>
+                            <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${sampleOrder.qty} | <button onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" style="background:none; border:none; color:var(--gold-solid); cursor:pointer; padding:0; font-size:0.68rem; text-decoration:underline;">View Details</button></span>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Live Chat</button>
+                    <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat</button>
                 </td>
                 <td>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--gold-solid); padding: 5px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-bell"></i> Processing
-                        </span>
-                        <span style="font-size: 0.65rem; color: var(--text-gray);">${sampleOrder.processingDate}</span>
-                    </div>
+                    <span id="processingStatus_${sampleOrder.orderId}" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">
+                        <i class="fa-solid fa-bell"></i> New Order Notification
+                    </span>
                 </td>
                 <td>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <!-- Auto tracking integrated via API simulation -->
-                        <div id="autoTrackBox_${sampleOrder.orderId}" style="display: flex; align-items: center; gap: 6px; background: rgba(0,255,100,0.05); border: 1px solid rgba(0,255,100,0.3); padding: 4px 8px; border-radius: 6px;">
-                            <i class="fa-solid fa-check-circle" style="color: #00ff64; font-size: 0.75rem;"></i>
-                            <span style="font-size: 0.68rem; color: #00ff64; font-weight: 600;">Auto Track API: <span id="autoTrackId_${sampleOrder.orderId}">TRK-AUTO-88421</span></span>
-                        </div>
-                        <div style="font-size: 0.62rem; color: var(--text-gray); text-align: center;">--- OR ---</div>
-                        <!-- Manual tracking trigger -->
-                        <button onclick="openManualTrackModal('${sampleOrder.orderId}')" style="background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600;"><i class="fa-solid fa-pen-to-square"></i> Manual Courier & Tracking</button>
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <select id="trackType_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleTrackTypeChange('${sampleOrder.orderId}')">
+                            <option value="Auto Track" selected>Auto Track</option>
+                            <option value="Manual Track">Manual Track</option>
+                        </select>
+                        <input type="text" id="trackInput_${sampleOrder.orderId}" placeholder="Enter Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:105px; outline:none;">
+                        <button id="saveTrackBtn_${sampleOrder.orderId}" onclick="saveHybridTracking('${sampleOrder.orderId}')" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold-solid); color:var(--gold-solid); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.68rem; font-weight:600;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                     </div>
                 </td>
-                <td><span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Shipping / Delivery & Return</span></td>
+                <td><span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Shipping</span></td>
             `;
             orderTbody.appendChild(tr);
             document.getElementById('totalOrdersCount').innerText = "1";
         }
 
-        window.openManualTrackModal = function(orderId) {
-            document.getElementById('manualTrackOrderId').value = orderId;
-            document.getElementById('manualTrackModalOverlay').style.display = 'flex';
+        window.handleTrackTypeChange = function(orderId) {
+            const trackType = document.getElementById('trackType_' + orderId).value;
+            const input = document.getElementById('trackInput_' + orderId);
+            if(trackType === 'Auto Track') {
+                input.placeholder = "Auto Generated ID";
+            } else {
+                input.placeholder = "Enter Tracking ID";
+            }
         }
 
-        window.closeManualTrackModal = function() {
-            document.getElementById('manualTrackModalOverlay').style.display = 'none';
-        }
+        window.saveHybridTracking = function(orderId) {
+            const trackVal = document.getElementById('trackInput_' + orderId).value.trim();
+            const trackType = document.getElementById('trackType_' + orderId).value;
+            const btn = document.getElementById('saveTrackBtn_' + orderId);
+            const shippingStatusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
 
-        window.submitManualTracking = function() {
-            const orderId = document.getElementById('manualTrackOrderId').value;
-            const courierName = document.getElementById('manualCourierName').value.trim();
-            const trackNo = document.getElementById('manualTrackNumber').value.trim();
-
-            if(!courierName || !trackNo) {
-                window.showToast("দয়া করে কুরিয়ারের নাম এবং ট্র্যাকিং আইডি লিখুন!", true);
+            if(trackType === 'Manual Track' && !trackVal) {
+                window.showToast("দয়া করে ট্র্যাকিং আইডি লিখুন!", true);
                 return;
             }
 
-            document.getElementById('shippingDeliveryStatus_' + orderId).innerText = `Shipped (${courierName}: ${trackNo})`;
-            document.getElementById('shippingDeliveryStatus_' + orderId).style.color = "var(--gold-solid)";
-            closeManualTrackModal();
-            window.showToast("Manual Tracking submitted successfully! Moved to Shipping.");
+            btn.innerHTML = `<i class="fa-solid fa-check"></i> Saved`;
+            btn.style.background = "var(--gold-solid)";
+            btn.style.color = "#000";
+
+            // Update shipping/delivery status workflow after tracking
+            shippingStatusSpan.innerText = "Shipping & Ready to Deliver";
+            shippingStatusSpan.style.color = "var(--gold-solid)";
+
+            window.showToast(`Tracking (${trackType}) processed successfully! Status moved to Shipping.`);
+
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save`;
+                btn.style.background = "rgba(212,175,55,0.15)";
+                btn.style.color = "var(--gold-solid)";
+            }, 3000);
         }
 
-        window.openOrderViewModal = function(orderId, item, qty, img, details) {
+        window.openOrderViewModal = function(orderId, item, qty, amount, img, details) {
             document.getElementById('modalOrderIdText').innerText = orderId;
             document.getElementById('modalProductImg').src = img;
             document.getElementById('modalProductName').innerText = item;
             document.getElementById('modalProductQty').innerText = qty;
+            document.getElementById('modalProductAmount').innerText = amount;
             document.getElementById('modalProductDetails').innerText = details;
             document.getElementById('orderViewModalOverlay').style.display = 'flex';
         }
@@ -400,14 +396,6 @@
             input.value = "";
             body.scrollTop = body.scrollHeight;
             window.showToast("Message sent to customer!");
-        }
-
-        window.openMandatoryOnboardingModal = function() {
-            document.getElementById('mandatoryOnboardingOverlay').style.display = 'flex';
-        }
-
-        window.closeMandatoryOnboardingModal = function() {
-            document.getElementById('mandatoryOnboardingOverlay').style.display = 'none';
         }
     </script>
 
@@ -616,13 +604,17 @@
         }
         .chat-seller-btn:hover { background: var(--gold-solid); color: #000; transform: translateY(-1px); }
 
-        #settingsSectionContainer { display: none; }
+        #settingsView { display: none; }
         .settings-container { 
             background: var(--card-bg); border: 1px solid var(--border-color); 
             border-radius: 14px; padding: 20px; box-shadow: var(--card-shadow);
         }
         
-        .settings-nav-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin-bottom: 20px; }
+        .settings-top-actions {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .settings-nav-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
         @media(min-width: 768px) { .settings-nav-tabs { grid-template-columns: repeat(4, 1fr); } }
 
         .sub-tab-btn {
@@ -659,20 +651,23 @@
             border: 1px solid var(--gold-solid); color: #fff; padding: 12px 18px;
             border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 9999; display: none; font-size: 0.78rem; font-weight: 600;
         }
+        
+        .back-cat-btn { background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
     </style>
 
     <script>
-        function toggleSettingsPanel() {
-            const settingsSec = document.getElementById('settingsSectionContainer');
+        function showView(viewName) {
             const overviewSec = document.getElementById('overviewView');
-            
-            if(settingsSec.style.display === 'block') {
-                settingsSec.style.display = 'none';
-                overviewSec.style.display = 'block';
-            } else {
-                settingsSec.style.display = 'block';
-                overviewSec.style.display = 'none';
+            const settingsSec = document.getElementById('settingsView');
 
+            overviewSec.style.display = 'none';
+            settingsSec.style.display = 'none';
+
+            if(viewName === 'overview') {
+                overviewSec.style.display = 'block';
+            } else if(viewName === 'settings') {
+                settingsSec.style.display = 'block';
+                
                 setTimeout(() => {
                     const qrContainer = document.getElementById('qrcodeContainer');
                     if (qrContainer && qrContainer.innerHTML === "") {
@@ -735,37 +730,6 @@
 
     <div id="toastBox"></div>
 
-    <!-- Mandatory First-Time Onboarding Modal (Blurred Background Effect) -->
-    <div id="mandatoryOnboardingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10005; padding: 15px;">
-        <div style="background: var(--card-bg); border: 1px solid var(--gold-solid); border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); max-height: 90vh; overflow-y: auto;">
-            <div class="modal-header">
-                <h4><i class="fa-solid fa-shield-cat"></i> Complete Onboarding & Settings Setup</h4>
-            </div>
-            <p style="font-size: 0.74rem; color: var(--text-gray); margin-bottom: 16px;">ড্যাশবোর্ড সম্পূর্ণভাবে দেখতে অনুগ্রহ করে আপনার অ্যাকাউন্ট ইনফো, পেমেন্ট সেটআপ এবং সিকিউরিটি পিন সম্পন্ন করুন।</p>
-            <form onsubmit="saveAccountForm(event)">
-                <div class="form-group"><label>Full Name</label><input type="text" id="storeFullName" required></div>
-                <div class="form-group"><label>Store Name</label><input type="text" id="storeNameInput" required></div>
-                <div class="form-group"><label>Gmail Account</label><input type="email" id="userDisplayEmail" readonly style="background:#0c0c0e;"></div>
-                <div class="form-group"><label>Personal Address</label><input type="text" id="personalAddressInput" required></div>
-                <div class="form-group"><label>Warehouse Address</label><input type="text" id="warehouseAddressInput" required></div>
-                <div class="form-group">
-                    <label>WhatsApp Number</label>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="countryCodeSelect" style="width: 130px; background: #08080a; border: 1px solid var(--border-color); color: var(--gold-solid); border-radius: 10px; padding: 11px 8px; font-size: 0.75rem;">
-                            <option value="+880">🇧🇩 +880 (BD)</option>
-                            <option value="+1">🇺🇸 +1 (US)</option>
-                            <option value="+44">🇬🇧 +44 (UK)</option>
-                            <option value="+91">🇮🇳 +91 (IN)</option>
-                            <option value="+971">🇦🇪 +971 (UAE)</option>
-                        </select>
-                        <input type="text" id="whatsappInput" placeholder="17XXXXXXXX" required style="flex: 1;">
-                    </div>
-                </div>
-                <button type="submit" class="save-btn">Save & Unlock Dashboard</button>
-            </form>
-        </div>
-    </div>
-
     <div id="loginSection" style="display: none;">
         <img src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="seller-logo-img">
         <h1 class="seller-sub-title">Become a Seller</h1>
@@ -790,20 +754,6 @@
         </div>
     </div>
 
-    <!-- Manual Tracking Modal Popup -->
-    <div id="manualTrackModalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10003; padding: 15px;" onclick="if(event.target === this) closeManualTrackModal()">
-        <div style="background: var(--card-bg); border: 1px solid var(--border-hover); border-radius: 20px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
-            <div class="modal-header">
-                <h4>Manual Courier & Tracking</h4>
-                <button class="modal-close-btn" onclick="closeManualTrackModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <input type="hidden" id="manualTrackOrderId">
-            <div class="form-group"><label>Courier Service Name</label><input type="text" id="manualCourierName" placeholder="e.g., RedX / Steadfast / DHL" required></div>
-            <div class="form-group"><label>Tracking ID</label><input type="text" id="manualTrackNumber" placeholder="Enter tracking number" required></div>
-            <button class="save-btn" onclick="submitManualTracking()">Save & Submit Tracking</button>
-        </div>
-    </div>
-
     <!-- Order Details Popup Modal -->
     <div id="orderViewModalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 15px;" onclick="if(event.target === this) closeOrderViewModal()">
         <div style="background: var(--card-bg); border: 1px solid var(--border-hover); border-radius: 20px; width: 100%; max-width: 450px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
@@ -817,9 +767,13 @@
                 <p id="modalProductDetails" style="margin: 0; font-size: 0.75rem; color: var(--text-gray); line-height: 1.5;"></p>
             </div>
             <div style="background: #141417; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 0.8rem;">
-                <div style="display: flex; justify-content: space-between;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                     <span style="color: var(--text-gray);">Ordered Quantity:</span>
                     <strong id="modalProductQty" style="color: #fff;"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-gray);">Total Amount:</span>
+                    <strong id="modalProductAmount" style="color: var(--gold-solid);"></strong>
                 </div>
             </div>
             <button class="save-btn" onclick="closeOrderViewModal()">Close View</button>
@@ -846,14 +800,14 @@
     <div id="dashboardSection">
         <header class="dash-header">
             <div class="dash-logo-area">
-                <img id="headerUserAvatar" src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="dash-logo-img" onclick="toggleSettingsPanel()" title="Click to toggle Settings & Security">
+                <img id="headerUserAvatar" src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="dash-logo-img" onclick="showView('settings')" title="Click to open Settings & Branding">
                 <div class="user-big-identity">
                     <h2 id="headerUserName">MR MASUDAR ENTERPRISE</h2>
                     <p id="headerUserId">ID: loading...</p>
                 </div>
             </div>
             <div class="header-right-actions">
-                <button class="header-settings-btn" onclick="toggleSettingsPanel()"><i class="fa-solid fa-gear"></i> Settings & Security</button>
+                <button class="header-settings-btn" onclick="showView('settings')"><i class="fa-solid fa-gear"></i> Settings & Security</button>
             </div>
         </header>
 
@@ -882,18 +836,18 @@
             <!-- Store Orders & Hybrid Tracking Section -->
             <div class="card-box">
                 <div class="card-box-header">
-                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Tracking Flow (Processing & Logistics)</h3>
+                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Hybrid Tracking (Processing & Logistics)</h3>
                 </div>
                 <div class="table-responsive-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Order ID</th>
-                                <th>Product Info</th>
+                                <th>Product Info (Image & View)</th>
                                 <th>Chat Option</th>
-                                <th>Processing (Date & Notification)</th>
-                                <th>Tracking (Auto / Manual)</th>
-                                <th>Delivery / Return</th>
+                                <th>Processing (Notification)</th>
+                                <th>Hybrid Tracking (Auto / Manual)</th>
+                                <th>Shipping & Delivery / Return</th>
                             </tr>
                         </thead>
                         <tbody id="orderTableBody">
@@ -925,16 +879,23 @@
                     </table>
                 </div>
             </div>
+
+            <div class="card-box" style="text-align: center; padding: 24px;">
+                <h3 style="color: var(--gold-solid); font-size: 0.95rem; margin-top:0; margin-bottom: 6px;"><i class="fa-solid fa-money-check-dollar"></i> Request Payout</h3>
+                <p style="color: var(--text-gray); font-size: 0.74rem; margin-bottom: 16px;">Withdraw available earnings to your configured payment gateway in Settings.</p>
+                <div style="display: flex; gap: 12px; max-width: 380px; margin: 0 auto; flex-wrap: wrap;">
+                    <input type="number" step="0.01" id="payoutRequestAmount" placeholder="Enter Amount ($)" style="flex: 1; min-width: 180px; background: #08080a; border: 1px solid var(--border-color); border-radius: 10px; padding: 11px; color: #fff; outline: none; font-size: 0.8rem;">
+                    <button type="button" class="luxury-upload-main-btn" style="padding: 11px 18px; font-size: 0.74rem; border-radius: 10px; min-width: unset;" onclick="requestPayoutAction()">Payout</button>
+                </div>
+            </div>
         </div>
 
-        <!-- SETTINGS PANEL CONTAINER (Toggled via Settings Button) -->
-        <div id="settingsSectionContainer">
+        <!-- SETTINGS VIEW -->
+        <div id="settingsView">
             <div class="settings-container">
-                <div class="settings-nav-tabs">
-                    <button class="sub-tab-btn active" onclick="switchSettingsTab('tabAccount', this)"><i class="fa-solid fa-user-pen"></i> Account Info</button>
-                    <button class="sub-tab-btn" onclick="switchSettingsTab('tabPayment', this)"><i class="fa-solid fa-wallet"></i> Payment Setup</button>
-                    <button class="sub-tab-btn" onclick="switchSettingsTab('tabPin', this)"><i class="fa-solid fa-key"></i> Security PIN</button>
-                    <button class="sub-tab-btn" onclick="switchSettingsTab('tab2FA', this)"><i class="fa-solid fa-shield-halved"></i> 2FA Verify</button>
+                <div class="settings-top-actions">
+                    <button type="button" class="back-cat-btn" onclick="showView('overview')"><i class="fa-solid fa-arrow-left"></i> BACK TO OVERVIEW</button>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--gold-solid); text-transform: uppercase;">Seller Settings & Security</span>
                 </div>
 
                 <div class="logo-edit-box">
@@ -947,6 +908,13 @@
                     <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="updateStoreLogo(event)">
                 </div>
 
+                <div class="settings-nav-tabs">
+                    <button class="sub-tab-btn active" onclick="switchSettingsTab('tabAccount', this)"><i class="fa-solid fa-user-pen"></i> Account Info</button>
+                    <button class="sub-tab-btn" onclick="switchSettingsTab('tabPayment', this)"><i class="fa-solid fa-wallet"></i> Payment Setup</button>
+                    <button class="sub-tab-btn" onclick="switchSettingsTab('tabPin', this)"><i class="fa-solid fa-key"></i> Security PIN</button>
+                    <button class="sub-tab-btn" onclick="switchSettingsTab('tab2FA', this)"><i class="fa-solid fa-shield-halved"></i> 2FA Verify</button>
+                </div>
+
                 <div id="tabAccount" class="sub-tab-content active" style="margin-top: 18px;">
                     <form onsubmit="saveAccountForm(event)">
                         <div class="form-group"><label>Full Name</label><input type="text" id="storeFullName" required></div>
@@ -954,6 +922,47 @@
                         <div class="form-group"><label>Gmail Account</label><input type="email" id="userDisplayEmail" readonly style="background:#0c0c0e;"></div>
                         <div class="form-group"><label>Personal Address</label><input type="text" id="personalAddressInput" required></div>
                         <div class="form-group"><label>Warehouse Address</label><input type="text" id="warehouseAddressInput" required></div>
+                        <div class="form-group">
+                            <label>WhatsApp Number (195+ Country Codes)</label>
+                            <div style="display: flex; gap: 8px;">
+                                <select id="countryCodeSelect" style="width: 145px; background: #08080a; border: 1px solid var(--border-color); color: var(--gold-solid); border-radius: 10px; padding: 11px 8px; font-size: 0.75rem;">
+                                    <option value="+880">🇧🇩 +880 (BD)</option>
+                                    <option value="+1">🇺🇸 +1 (US/CA)</option>
+                                    <option value="+44">🇬🇧 +44 (UK)</option>
+                                    <option value="+91">🇮🇳 +91 (IN)</option>
+                                    <option value="+971">🇦🇪 +971 (UAE)</option>
+                                    <option value="+966">🇸🇦 +966 (KSA)</option>
+                                    <option value="+65">🇸🇬 +65 (SG)</option>
+                                    <option value="+60">🇲🇾 +60 (MY)</option>
+                                    <option value="+61">🇦🇺 +61 (AU)</option>
+                                    <option value="+49">🇩🇪 +49 (DE)</option>
+                                    <option value="+33">🇫🇷 +33 (FR)</option>
+                                    <option value="+81">🇯🇵 +81 (JP)</option>
+                                    <option value="+86">🇨🇳 +86 (CN)</option>
+                                    <option value="+7">🇷🇺 +7 (RU)</option>
+                                    <option value="+39">🇮🇹 +39 (IT)</option>
+                                    <option value="+34">🇪🇸 +34 (ES)</option>
+                                    <option value="+55">🇧🇷 +55 (BR)</option>
+                                    <option value="+27">🇿🇦 +27 (ZA)</option>
+                                    <option value="+20">🇪🇬 +20 (EG)</option>
+                                    <option value="+92">🇵🇰 +92 (PK)</option>
+                                    <option value="+886">🇹🇼 +886 (TW)</option>
+                                    <option value="+82">🇰🇷 +82 (KR)</option>
+                                    <option value="+31">🇳🇱 +31 (NL)</option>
+                                    <option value="+46">🇸🇪 +46 (SE)</option>
+                                    <option value="+41">🇨🇭 +41 (CH)</option>
+                                    <option value="+64">🇳🇿 +64 (NZ)</option>
+                                    <option value="+52">🇲🇽 +52 (MX)</option>
+                                    <option value="+54">🇦🇷 +54 (AR)</option>
+                                    <option value="+90">🇹🇷 +90 (TR)</option>
+                                    <option value="+62">🇮🇩 +62 (ID)</option>
+                                    <option value="+63">🇵🇭 +63 (PH)</option>
+                                    <option value="+84">🇻🇳 +84 (VN)</option>
+                                    <option value="+66">🇹🇭 +66 (TH)</option>
+                                </select>
+                                <input type="text" id="whatsappInput" placeholder="17XXXXXXXX" required style="flex: 1;">
+                            </div>
+                        </div>
                         <button type="submit" class="save-btn">Save Account Info</button>
                     </form>
                 </div>
