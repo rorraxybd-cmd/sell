@@ -247,7 +247,7 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td><strong>${data.productId}</strong><br><span style="color:#888;">${data.productName}</span></td>
-                            <td><button class="chat-seller-btn" onclick="window.showToast('Opening Chat with Customer for ${data.productId}')"><i class="fa-solid fa-comments"></i> Chat</button></td>
+                            <td><button class="chat-seller-btn" onclick="openChatBox('${data.productId}')"><i class="fa-solid fa-comments"></i> Chat</button></td>
                             <td>
                                 <div><strong>Local:</strong> $${data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00'}</div>
                                 <div style="font-size:0.7rem; color:var(--gold-solid);">Intl: $${data.intlPrice ? data.intlPrice.toFixed(2) : (data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00')}</div>
@@ -303,37 +303,46 @@
                     </div>
                 </td>
                 <td>
-                    <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat (0)</button>
+                    <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat</button>
                 </td>
-                <td>${sampleOrder.amount}</td>
                 <td>
-                    <select id="statusSelect_${sampleOrder.orderId}" onchange="window.showToast('Order Status updated to: ' + this.value)" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; outline:none;">
-                        <option value="Ready to Ship" selected>Ready to Ship</option>
-                        <option value="Processing">Processing</option>
-                    </select>
+                    <span id="processingStatus_${sampleOrder.orderId}" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">
+                        <i class="fa-solid fa-bell"></i> New Order Notification
+                    </span>
                 </td>
                 <td>
                     <div style="display: flex; gap: 5px; align-items: center;">
-                        <select id="trackType_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;">
-                            <option value="Auto Track">Auto Track</option>
-                            <option value="Manual Track" selected>Manual Track</option>
+                        <select id="trackType_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleTrackTypeChange('${sampleOrder.orderId}')">
+                            <option value="Auto Track" selected>Auto Track</option>
+                            <option value="Manual Track">Manual Track</option>
                         </select>
                         <input type="text" id="trackInput_${sampleOrder.orderId}" placeholder="Enter Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:105px; outline:none;">
                         <button id="saveTrackBtn_${sampleOrder.orderId}" onclick="saveHybridTracking('${sampleOrder.orderId}')" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold-solid); color:var(--gold-solid); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.68rem; font-weight:600;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                     </div>
                 </td>
-                <td><span style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Delivery</span></td>
+                <td><span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Shipping</span></td>
             `;
             orderTbody.appendChild(tr);
             document.getElementById('totalOrdersCount').innerText = "1";
+        }
+
+        window.handleTrackTypeChange = function(orderId) {
+            const trackType = document.getElementById('trackType_' + orderId).value;
+            const input = document.getElementById('trackInput_' + orderId);
+            if(trackType === 'Auto Track') {
+                input.placeholder = "Auto Generated ID";
+            } else {
+                input.placeholder = "Enter Tracking ID";
+            }
         }
 
         window.saveHybridTracking = function(orderId) {
             const trackVal = document.getElementById('trackInput_' + orderId).value.trim();
             const trackType = document.getElementById('trackType_' + orderId).value;
             const btn = document.getElementById('saveTrackBtn_' + orderId);
+            const shippingStatusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
 
-            if(!trackVal) {
+            if(trackType === 'Manual Track' && !trackVal) {
                 window.showToast("দয়া করে ট্র্যাকিং আইডি লিখুন!", true);
                 return;
             }
@@ -341,7 +350,12 @@
             btn.innerHTML = `<i class="fa-solid fa-check"></i> Saved`;
             btn.style.background = "var(--gold-solid)";
             btn.style.color = "#000";
-            window.showToast(`Tracking (${trackType}) ID: ${trackVal} successfully saved!`);
+
+            // Update shipping/delivery status workflow after tracking
+            shippingStatusSpan.innerText = "Shipping & Ready to Deliver";
+            shippingStatusSpan.style.color = "var(--gold-solid)";
+
+            window.showToast(`Tracking (${trackType}) processed successfully! Status moved to Shipping.`);
 
             setTimeout(() => {
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save`;
@@ -364,8 +378,8 @@
             document.getElementById('orderViewModalOverlay').style.display = 'none';
         }
 
-        window.openChatBox = function(orderId) {
-            document.getElementById('chatModalTitle').innerText = "Customer Live Chat - Order: " + orderId;
+        window.openChatBox = function(targetId) {
+            document.getElementById('chatModalTitle').innerText = "Customer Live Chat - Target: " + targetId;
             document.getElementById('chatModalOverlay').style.display = 'flex';
         }
 
@@ -585,10 +599,10 @@
         td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; white-space: nowrap; }
 
         .chat-seller-btn {
-            background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--gold-solid); padding: 5px 10px; border-radius: 14px; font-size: 0.68rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold-solid); padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s ease;
         }
-        .chat-seller-btn:hover { background: var(--gold-solid); color: #000; }
+        .chat-seller-btn:hover { background: var(--gold-solid); color: #000; transform: translateY(-1px); }
 
         #settingsView { display: none; }
         .settings-container { 
@@ -819,10 +833,10 @@
                 </div>
             </div>
 
-            <!-- Store Orders & Hybrid Tracking Section (Scrollable on Mobile & PC) -->
+            <!-- Store Orders & Hybrid Tracking Section -->
             <div class="card-box">
                 <div class="card-box-header">
-                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Hybrid Tracking (Auto + Manual)</h3>
+                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Hybrid Tracking (Processing & Logistics)</h3>
                 </div>
                 <div class="table-responsive-container">
                     <table>
@@ -831,14 +845,13 @@
                                 <th>Order ID</th>
                                 <th>Product Info (Image & View)</th>
                                 <th>Chat Option</th>
-                                <th>Amount</th>
-                                <th>Status</th>
+                                <th>Processing (Notification)</th>
                                 <th>Hybrid Tracking (Auto / Manual)</th>
-                                <th>Delivery / Return</th>
+                                <th>Shipping & Delivery / Return</th>
                             </tr>
                         </thead>
                         <tbody id="orderTableBody">
-                            <tr><td colspan="7" style="text-align: center; color: #777; padding: 20px;">Loading incoming order sample...</td></tr>
+                            <tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;">Loading incoming order sample...</td></tr>
                         </tbody>
                     </table>
                 </div>
