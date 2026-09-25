@@ -330,12 +330,11 @@
                         <span style="color: var(--text-gray); font-size: 0.7rem; font-weight: 500;">Awaiting</span>
                     </div>
                 </td>
-                <td>
-                    <select id="deliveryReturn_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:5px 8px; border-radius:6px; font-size:0.75rem; outline:none;" onchange="handleDeliveryReturnChange('${sampleOrder.orderId}')">
-                        <option value="In Transit" selected>In Transit</option>
-                        <option value="Delivery">Delivery</option>
-                        <option value="Return">Return</option>
-                    </select>
+                <td style="text-align: center;">
+                    <div id="deliveryReturnStatus_${sampleOrder.orderId}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 6px;">
+                        <span style="color: var(--text-gray); font-size: 0.7rem;"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                        <span style="color: var(--text-gray); font-size: 0.72rem; font-weight: 500;">In Transit</span>
+                    </div>
                 </td>
             `;
             orderTbody.appendChild(tr);
@@ -370,24 +369,6 @@
                 btn.style.background = "rgba(212,175,55,0.15)";
                 btn.style.color = "var(--gold-solid)";
             }, 3000);
-        }
-
-        window.handleDeliveryReturnChange = function(orderId) {
-            const val = document.getElementById('deliveryReturn_' + orderId).value;
-            const selectEl = document.getElementById('deliveryReturn_' + orderId);
-            
-            if(val === 'Return') {
-                selectEl.style.color = "#ff4d4d";
-                selectEl.style.borderColor = "#ff4d4d";
-                window.showToast("Order marked as Return.", true);
-            } else if (val === 'Delivery') {
-                selectEl.style.color = "var(--gold-solid)";
-                selectEl.style.borderColor = "var(--gold-solid)";
-                window.showToast("Order marked as Delivered!");
-            } else {
-                selectEl.style.color = "#fff";
-                selectEl.style.borderColor = "var(--border-color)";
-            }
         }
 
         window.openOrderViewModal = function(orderId, item, qty, amount, img, details) {
@@ -912,7 +893,7 @@
                                 <th>Processing (Auto ID)</th>
                                 <th>Manual Tracking</th>
                                 <th style="text-align: center;">Shipping</th>
-                                <th>Delivery / Return</th>
+                                <th style="text-align: center;">Delivery / Return (Courier Auto)</th>
                             </tr>
                         </thead>
                         <tbody id="orderTableBody">
