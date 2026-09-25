@@ -296,7 +296,8 @@
             orderTbody.innerHTML = "";
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${sampleOrder.orderId}</strong><br><span style="font-size:0.65rem; color:var(--text-gray);">${sampleOrder.date}</span></td>
+                <td><strong>${sampleOrder.orderId}</strong></td>
+                <td><span style="font-size: 0.72rem; color: var(--text-gray);">${sampleOrder.date}</span></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
@@ -310,21 +311,26 @@
                     <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat</button>
                 </td>
                 <td>
-                    <span id="processingStatus_${sampleOrder.orderId}" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">
-                        <i class="fa-solid fa-bell"></i> Processing Notification
-                    </span>
-                </td>
-                <td>
-                    <div style="display: flex; gap: 5px; align-items: center;">
+                    <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
                         <select id="trackType_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleTrackTypeChange('${sampleOrder.orderId}')">
                             <option value="Auto Track" selected>Auto Track</option>
                             <option value="Manual Track">Manual Track</option>
                         </select>
+                        <input type="text" id="courierNameInput_${sampleOrder.orderId}" placeholder="Courier Name" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:90px; outline:none; display:none;">
                         <input type="text" id="trackInput_${sampleOrder.orderId}" placeholder="Enter Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:105px; outline:none;">
                         <button id="saveTrackBtn_${sampleOrder.orderId}" onclick="saveHybridTracking('${sampleOrder.orderId}')" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold-solid); color:var(--gold-solid); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.68rem; font-weight:600;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                     </div>
                 </td>
-                <td><span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Shipping</span></td>
+                <td>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span id="shippingDeliveryStatus_${sampleOrder.orderId}" style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Shipping</span>
+                        <select id="returnStatus_${sampleOrder.orderId}" style="background:#08080a; border:1px solid var(--border-color); color:#ff4d4d; padding:3px; border-radius:6px; font-size:0.65rem; outline:none;" onchange="handleReturnStatusChange('${sampleOrder.orderId}')">
+                            <option value="No Return" selected>No Return</option>
+                            <option value="Return Requested">Return Requested</option>
+                            <option value="Returned Completed">Returned Completed</option>
+                        </select>
+                    </div>
+                </td>
             `;
             orderTbody.appendChild(tr);
             document.getElementById('totalOrdersCount').innerText = "1";
@@ -332,22 +338,26 @@
 
         window.handleTrackTypeChange = function(orderId) {
             const trackType = document.getElementById('trackType_' + orderId).value;
+            const courierInput = document.getElementById('courierNameInput_' + orderId);
             const input = document.getElementById('trackInput_' + orderId);
             if(trackType === 'Auto Track') {
+                courierInput.style.display = 'none';
                 input.placeholder = "Auto Generated ID";
             } else {
-                input.placeholder = "Enter Tracking ID";
+                courierInput.style.display = 'inline-block';
+                input.placeholder = "Tracking ID";
             }
         }
 
         window.saveHybridTracking = function(orderId) {
             const trackVal = document.getElementById('trackInput_' + orderId).value.trim();
             const trackType = document.getElementById('trackType_' + orderId).value;
+            const courierName = document.getElementById('courierNameInput_' + orderId).value.trim();
             const btn = document.getElementById('saveTrackBtn_' + orderId);
             const shippingStatusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
 
-            if(trackType === 'Manual Track' && !trackVal) {
-                window.showToast("দয়া করে ট্র্যাকিং আইডি লিখুন!", true);
+            if(trackType === 'Manual Track' && (!courierName || !trackVal)) {
+                window.showToast("দয়া করে কুরিয়ারের নাম এবং ট্র্যাকিং আইডি উভয়ই লিখুন!", true);
                 return;
             }
 
@@ -358,13 +368,26 @@
             shippingStatusSpan.innerText = "Shipping & Ready to Deliver";
             shippingStatusSpan.style.color = "var(--gold-solid)";
 
-            window.showToast(`Tracking (${trackType}) processed successfully! Status moved to Shipping.`);
+            window.showToast(`Tracking (${trackType}) saved successfully! Status moved to Shipping.`);
 
             setTimeout(() => {
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save`;
                 btn.style.background = "rgba(212,175,55,0.15)";
                 btn.style.color = "var(--gold-solid)";
             }, 3000);
+        }
+
+        window.handleReturnStatusChange = function(orderId) {
+            const val = document.getElementById('returnStatus_' + orderId).value;
+            const statusSpan = document.getElementById('shippingDeliveryStatus_' + orderId);
+            if(val !== 'No Return') {
+                statusSpan.innerText = val;
+                statusSpan.style.color = "#ff4d4d";
+                window.showToast("Order status updated: " + val, true);
+            } else {
+                statusSpan.innerText = "Shipping & Ready to Deliver";
+                statusSpan.style.color = "var(--gold-solid)";
+            }
         }
 
         window.openOrderViewModal = function(orderId, item, qty, amount, img, details) {
@@ -382,7 +405,8 @@
         }
 
         window.openChatBox = function(targetId) {
-            document.getElementById('chatModalTitle').innerText = "Customer Live Chat - Target: " + targetId;
+            document.getElementById('chatModalTitle').innerText = "Live Chat - Target: " + targetId;
+            document.getElementById('chatMessagesBody').innerHTML = `<div style="text-align: left; margin-bottom: 8px;"><span style="background: #1d1d22; color: #ccc; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">Hello seller, I have a query regarding order ${targetId}!</span></div>`;
             document.getElementById('chatModalOverlay').style.display = 'flex';
         }
 
@@ -406,14 +430,12 @@
             const amount = parseFloat(amountInput.value);
             const data = window.userState.sellerData;
 
-            // Check if Account Info / Payment Setup is complete
             if (!data || !data.storeName || !data.personalAddress || !data.whatsapp) {
                 window.showToast("আপনার অ্যাকাউন্ট ইনফো বা পেমেন্ট সেটআপ সম্পূর্ণ করা নেই। সেটিংসে নিয়ে যাওয়া হচ্ছে।", true);
                 showView('settings');
                 return;
             }
 
-            // Check Balance
             if (!window.userState.balance || window.userState.balance <= 0 || (amount && amount > window.userState.balance)) {
                 window.showToast("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!", true);
                 return;
@@ -827,14 +849,14 @@
     <div id="chatModalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10002; padding: 15px;" onclick="if(event.target === this) closeChatBox()">
         <div style="background: var(--card-bg); border: 1px solid var(--border-hover); border-radius: 20px; width: 100%; max-width: 420px; height: 480px; display: flex; flex-direction: column; box-shadow: 0 15px 40px rgba(0,0,0,0.8); overflow: hidden;">
             <div class="modal-header" style="padding: 14px 18px; margin: 0;">
-                <h4 id="chatModalTitle" style="font-size: 0.85rem;">Customer Live Chat</h4>
+                <h4 id="chatModalTitle" style="font-size: 0.85rem;">Live Chat</h4>
                 <button class="modal-close-btn" onclick="closeChatBox()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="chatMessagesBody" style="flex: 1; padding: 14px; overflow-y: auto; background: #08080a;">
-                <div style="text-align: left; margin-bottom: 8px;"><span style="background: #1d1d22; color: #ccc; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">Hello seller, I have a query regarding my order shipment!</span></div>
+                <!-- Clean professional chat box content -->
             </div>
             <div style="padding: 12px; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; gap: 8px;">
-                <input type="text" id="chatMessageInput" placeholder="Type message to customer..." style="flex: 1; background: #08080a; border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 0.75rem; outline: none;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <input type="text" id="chatMessageInput" placeholder="Type message..." style="flex: 1; background: #08080a; border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 0.75rem; outline: none;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
                 <button onclick="sendChatMessage()" style="background: var(--gold-gradient); border: none; color: #000; font-weight: 700; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.75rem;"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
@@ -876,20 +898,20 @@
                 </div>
             </div>
 
-            <!-- Store Orders & Hybrid Tracking Section -->
+            <!-- Store Orders Section -->
             <div class="card-box">
                 <div class="card-box-header">
-                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Hybrid Tracking (Processing & Logistics)</h3>
+                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders</h3>
                 </div>
                 <div class="table-responsive-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Order ID & Date</th>
-                                <th>Product Info (View Details)</th>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Product Info</th>
                                 <th>Chat Option</th>
-                                <th>Processing (Notification)</th>
-                                <th>Hybrid Tracking (Auto / Manual)</th>
+                                <th>Tracking (Auto / Manual)</th>
                                 <th>Shipping & Delivery / Return</th>
                             </tr>
                         </thead>
