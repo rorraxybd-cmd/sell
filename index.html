@@ -267,14 +267,13 @@
                 document.getElementById('totalProductsCount').innerText = count;
 
                 if(count === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Use the buttons above to list items!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Use the upload button above to list items!</td></tr>`;
                 }
             } catch (e) {
                 console.log("Error loading products:", e);
             }
         }
 
-        // Mock Orders Data with Hybrid Manual/API Tracking Support
         function loadMockOrders() {
             const orderTbody = document.getElementById('orderTableBody');
             const sampleOrders = [
@@ -440,40 +439,88 @@
             opacity: 0.8;
         }
 
-        /* Product Action Buttons */
-        .product-type-buttons-wrap {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin: 20px 0 24px 0;
+        /* Top Action Bar with Single Modal Trigger Button */
+        .dashboard-actions-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 20px 0 24px 0; flex-wrap: wrap; gap: 15px;
         }
-        @media(max-width: 768px) {
-            .product-type-buttons-wrap { grid-template-columns: repeat(2, 1fr); }
-        }
-        .product-type-btn {
-            background: var(--card-bg);
-            border: 1px solid rgba(212, 175, 55, 0.35);
-            color: #ffffff;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 0.74rem;
-            font-weight: 600;
+        .dashboard-actions-bar h3 { margin: 0; font-size: 0.95rem; color: #fff; font-weight: 600; }
+
+        .luxury-upload-main-btn {
+            background: var(--gold-gradient);
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
             transition: 0.2s ease;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .product-type-btn:hover {
+        .luxury-upload-main-btn:hover { transform: translateY(-2px); opacity: 0.95; }
+
+        /* Modal Overlay & Box */
+        #uploadModalOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 10000;
+            padding: 15px;
+        }
+        .upload-modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-hover);
+            border-radius: 20px;
+            width: 100%; max-width: 480px;
+            padding: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            animation: modalFadeIn 0.2s ease;
+        }
+        @keyframes modalFadeIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 18px;
+        }
+        .modal-header h4 { margin: 0; font-size: 0.95rem; color: var(--gold-solid); text-transform: uppercase; font-weight: 700; }
+        .modal-close-btn { background: none; border: none; color: var(--text-gray); font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .modal-close-btn:hover { color: #fff; }
+
+        .modal-options-grid {
+            display: grid; grid-template-columns: 1fr; gap: 12px;
+        }
+        .modal-option-card {
+            background: #141417;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: 0.2s ease;
+        }
+        .modal-option-card:hover {
+            border-color: var(--gold-solid);
+            background: rgba(212, 175, 55, 0.05);
+            transform: translateX(3px);
+        }
+        .modal-option-card i {
+            font-size: 1.2rem;
             background: var(--gold-gradient);
-            color: #000;
-            border-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            width: 24px; text-align: center;
         }
+        .modal-option-card .opt-title { font-size: 0.8rem; font-weight: 600; margin: 0 0 2px 0; color: #fff; }
+        .modal-option-card .opt-desc { font-size: 0.68rem; margin: 0; color: var(--text-gray); }
 
         .shipping-warning-note {
             background: rgba(212, 175, 55, 0.05);
@@ -613,6 +660,14 @@
             }
         }
 
+        // Modal Open / Close Functions
+        function openUploadModal() {
+            document.getElementById('uploadModalOverlay').style.display = 'flex';
+        }
+        function closeUploadModal() {
+            document.getElementById('uploadModalOverlay').style.display = 'none';
+        }
+
         function switchSettingsTab(subTabId, btnElement) {
             document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -683,6 +738,46 @@
         </button>
     </div>
 
+    <!-- Product Category Select Modal Popup -->
+    <div id="uploadModalOverlay" onclick="if(event.target === this) closeUploadModal()">
+        <div class="upload-modal-box">
+            <div class="modal-header">
+                <h4><i class="fa-solid fa-circle-plus" style="margin-right: 6px;"></i> Select Product Category</h4>
+                <button class="modal-close-btn" onclick="closeUploadModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-options-grid">
+                <a href="r.html" class="modal-option-card">
+                    <i class="fa-solid fa-store"></i>
+                    <div>
+                        <p class="opt-title">Retail Product Upload</p>
+                        <p class="opt-desc">List single items for direct retail customers.</p>
+                    </div>
+                </a>
+                <a href="w.html" class="modal-option-card">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <div>
+                        <p class="opt-title">Wholesale Product Upload</p>
+                        <p class="opt-desc">Offer bulk products with Tier pricing options.</p>
+                    </div>
+                </a>
+                <a href="both.html" class="modal-option-card">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <div>
+                        <p class="opt-title">Retail & Wholesale Both</p>
+                        <p class="opt-desc">Enable both sales options on a single listing.</p>
+                    </div>
+                </a>
+                <a href="l.html" class="modal-option-card">
+                    <i class="fa-solid fa-video"></i>
+                    <div>
+                        <p class="opt-title">Live Stream / Video Add</p>
+                        <p class="opt-desc">Attach listings for live selling sessions.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div id="dashboardSection">
         <!-- Luxury Ecosystem Header -->
         <header class="dash-header">
@@ -724,12 +819,12 @@
                 </div>
             </div>
 
-            <!-- Product Action Buttons -->
-            <div class="product-type-buttons-wrap">
-                <a href="r.html" class="product-type-btn"><i class="fa-solid fa-store"></i> Retail Add</a>
-                <a href="w.html" class="product-type-btn"><i class="fa-solid fa-boxes-stacked"></i> Wholesale Add</a>
-                <a href="both.html" class="product-type-btn"><i class="fa-solid fa-layer-group"></i> Both Add</a>
-                <a href="l.html" class="product-type-btn"><i class="fa-solid fa-video"></i> Live Add</a>
+            <!-- Single Luxury Action Bar for New Product Upload -->
+            <div class="dashboard-actions-bar">
+                <h3>Store Inventory Management</h3>
+                <button class="luxury-upload-main-btn" onclick="openUploadModal()">
+                    <i class="fa-solid fa-plus"></i> New Product Upload
+                </button>
             </div>
 
             <div class="shipping-warning-note">
@@ -789,7 +884,7 @@
                 <p style="color: var(--text-gray); font-size: 0.74rem; margin-bottom: 16px;">Withdraw available earnings to your configured payment gateway in Settings.</p>
                 <div style="display: flex; gap: 12px; max-width: 380px; margin: 0 auto; flex-wrap: wrap;">
                     <input type="number" step="0.01" id="payoutRequestAmount" placeholder="Enter Amount ($)" style="flex: 1; min-width: 180px; background: #08080a; border: 1px solid var(--border-color); border-radius: 10px; padding: 11px; color: #fff; outline: none; font-size: 0.8rem;">
-                    <button type="button" class="product-type-btn" style="padding: 11px 18px; font-size: 0.74rem; border-radius: 10px; min-width: unset; flex: unset;" onclick="requestPayoutAction()">Request</button>
+                    <button type="button" class="luxury-upload-main-btn" style="padding: 11px 18px; font-size: 0.74rem; border-radius: 10px; min-width: unset; flex: unset; box-shadow: none;" onclick="requestPayoutAction()">Request</button>
                 </div>
             </div>
         </div>
@@ -808,7 +903,7 @@
                         <h4 style="margin:0 0 3px 0; color:var(--gold-solid); font-size:0.85rem;">Store Logo Branding</h4>
                         <p style="margin:0; font-size:0.7rem; color:var(--text-gray);">Upload your custom luxury store logo.</p>
                     </div>
-                    <button type="button" class="product-type-btn" style="padding: 8px 14px; font-size: 0.72rem; border-radius: 8px; min-width: unset;" onclick="document.getElementById('logoFileInput').click()">Change Logo</button>
+                    <button type="button" class="luxury-upload-main-btn" style="padding: 8px 14px; font-size: 0.72rem; border-radius: 8px; min-width: unset;" onclick="document.getElementById('logoFileInput').click()">Change Logo</button>
                     <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="updateStoreLogo(event)">
                 </div>
 
