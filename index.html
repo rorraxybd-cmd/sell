@@ -249,6 +249,10 @@
                                 <div><strong>Local:</strong> $${data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00'}</div>
                                 <div style="font-size:0.7rem; color:var(--gold-solid);">Intl: $${data.intlPrice ? data.intlPrice.toFixed(2) : (data.sellingPrice ? data.sellingPrice.toFixed(2) : '0.00')}</div>
                             </td>
+                            <td>
+                                <div><strong>Local:</strong> ${data.localDiscount ? data.localDiscount + '%' : '0%'}</div>
+                                <div style="font-size:0.7rem; color:var(--gold-solid);">Intl: ${data.intlDiscount ? data.intlDiscount + '%' : '0%'}</div>
+                            </td>
                             <td>${data.stock || 0}</td>
                             <td><div style="max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${data.details || 'N/A'}">${data.details || 'N/A'}</div></td>
                             <td><span style="font-size:0.7rem; color:#ccc;">${data.customSizeNote || 'None'}</span></td>
@@ -264,7 +268,7 @@
                 document.getElementById('totalProductsCount').innerText = count;
 
                 if(count === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Click any of the product buttons above to list items!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #777; padding: 24px;">No products uploaded yet. Click any of the product buttons above to list items!</td></tr>`;
                 }
             } catch (e) {
                 console.log("Error loading products:", e);
@@ -468,7 +472,7 @@
         }
         .card-box-header h3 { margin: 0; font-size: 0.85rem; color: #fff; font-weight: 600; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.74rem; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.74rem; min-width: 750px; }
         th { color: var(--text-gray); font-weight: 500; padding: 10px 8px; border-bottom: 1px solid var(--border-color); }
         td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; }
 
@@ -752,11 +756,11 @@
                 </div>
             </div>
 
-            <!-- Three Distinct Add Product Buttons in a Row -->
+            <!-- Three Distinct Add Product Buttons in a Row (Retail 'R' in the middle) -->
             <div class="product-type-buttons-wrap">
-                <a href="add-retail-product.html" class="product-type-btn"><i class="fa-solid fa-store"></i> Retail Add Product</a>
-                <a href="add-wholesale-product.html" class="product-type-btn"><i class="fa-solid fa-boxes-stacked"></i> Wholesale Add Product</a>
-                <a href="add-live-product.html" class="product-type-btn"><i class="fa-solid fa-video"></i> Live Add Product</a>
+                <a href="w.html" class="product-type-btn"><i class="fa-solid fa-boxes-stacked"></i> Wholesale Add Product</a>
+                <a href="r.html" class="product-type-btn"><i class="fa-solid fa-store"></i> Retail Add Product</a>
+                <a href="l.html" class="product-type-btn"><i class="fa-solid fa-video"></i> Live Add Product</a>
             </div>
 
             <!-- Shipping & Pricing Note for Sellers -->
@@ -775,7 +779,8 @@
                         <tr>
                             <th>Product ID / Title</th>
                             <th>Chat</th>
-                            <th>Price & Discount</th>
+                            <th>Price</th>
+                            <th>Discount</th>
                             <th>Stock</th>
                             <th>Details</th>
                             <th>Custom Size & Note</th>
@@ -784,7 +789,7 @@
                     </thead>
                     <tbody id="productTableBody">
                         <tr>
-                            <td colspan="7" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet. Click any of the product buttons above to list items!</td>
+                            <td colspan="8" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet. Click any of the product buttons above to list items!</td>
                         </tr>
                     </tbody>
                 </table>
