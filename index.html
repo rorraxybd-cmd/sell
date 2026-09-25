@@ -40,7 +40,7 @@
         });
 
         const secretKeyBase32 = "JBSWY3DPEHPK3PXP";
-        window.userState = { firebaseUser: null, sellerId: "" };
+        window.userState = { firebaseUser: null, sellerId: "", sellerData: null, balance: 0.00 };
 
         window.showToast = function(message, isError = false) {
             const toast = document.getElementById('toastBox');
@@ -83,6 +83,7 @@
                 if (sellerSnap.exists() && sellerSnap.data().sellerId) {
                     finalSellerId = sellerSnap.data().sellerId;
                     const data = sellerSnap.data();
+                    window.userState.sellerData = data;
                     document.getElementById('storeFullName').value = data.fullName || user.displayName || "";
                     document.getElementById('storeNameInput').value = data.storeName || "";
                     document.getElementById('personalAddressInput').value = data.personalAddress || "";
@@ -104,7 +105,7 @@
                     const uniqueNum = Math.floor(Math.random() * 8999 + 1000);
                     finalSellerId = "SEL-" + cleanIdBase + randomChars + uniqueNum;
 
-                    await setDoc(sellerRef, {
+                    const newSellerData = {
                         uid: user.uid,
                         fullName: user.displayName || "",
                         storeName: "MR MASUDAR ENTERPRISE",
@@ -114,7 +115,9 @@
                         role: "seller",
                         status: "active",
                         createdAt: new Date().toISOString()
-                    }, { merge: true });
+                    };
+                    window.userState.sellerData = newSellerData;
+                    await setDoc(sellerRef, newSellerData, { merge: true });
                 }
             } catch (e) {
                 finalSellerId = "SEL-rorraxy" + Math.floor(Math.random() * 8999 + 1000);
@@ -185,9 +188,9 @@
                 const user = auth.currentUser;
                 if(user) {
                     const sellerRef = doc(db, "sellers", user.uid);
-                    await setDoc(sellerRef, {
-                        fullName, storeName, personalAddress, warehouseAddress, countryCode, whatsapp
-                    }, { merge: true });
+                    const updateData = { fullName, storeName, personalAddress, warehouseAddress, countryCode, whatsapp };
+                    await setDoc(sellerRef, updateData, { merge: true });
+                    window.userState.sellerData = { ...window.userState.sellerData, ...updateData };
                 }
                 showSpinner(false);
                 window.showToast("Account Info saved successfully to Firebase!");
@@ -286,19 +289,20 @@
                 qty: 1, 
                 amount: "$120.00", 
                 img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png",
-                details: "High-end Gamar wood center table with Golden Teak finish. Premium handcrafted quality."
+                details: "High-end Gamar wood center table with Golden Teak finish. Premium handcrafted quality.",
+                date: "26 Sep 2026"
             };
 
             orderTbody.innerHTML = "";
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${sampleOrder.orderId}</strong></td>
+                <td><strong>${sampleOrder.orderId}</strong><br><span style="font-size:0.65rem; color:var(--text-gray);">${sampleOrder.date}</span></td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
                         <div>
-                            <strong style="cursor: pointer; color: var(--gold-solid);" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')">${sampleOrder.item}</strong><br>
-                            <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${sampleOrder.qty} | <button onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" style="background:none; border:none; color:var(--gold-solid); cursor:pointer; padding:0; font-size:0.68rem; text-decoration:underline;">View Details</button></span>
+                            <button onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" style="background:none; border:none; color:var(--gold-solid); cursor:pointer; padding:0; font-size:0.75rem; font-weight:600; text-decoration:underline;">View Details</button><br>
+                            <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${sampleOrder.qty}</span>
                         </div>
                     </div>
                 </td>
@@ -307,7 +311,7 @@
                 </td>
                 <td>
                     <span id="processingStatus_${sampleOrder.orderId}" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">
-                        <i class="fa-solid fa-bell"></i> New Order Notification
+                        <i class="fa-solid fa-bell"></i> Processing Notification
                     </span>
                 </td>
                 <td>
@@ -351,7 +355,6 @@
             btn.style.background = "var(--gold-solid)";
             btn.style.color = "#000";
 
-            // Update shipping/delivery status workflow after tracking
             shippingStatusSpan.innerText = "Shipping & Ready to Deliver";
             shippingStatusSpan.style.color = "var(--gold-solid)";
 
@@ -396,6 +399,44 @@
             input.value = "";
             body.scrollTop = body.scrollHeight;
             window.showToast("Message sent to customer!");
+        }
+
+        window.requestPayoutAction = function() {
+            const amountInput = document.getElementById('payoutRequestAmount');
+            const amount = parseFloat(amountInput.value);
+            const data = window.userState.sellerData;
+
+            // Check if Account Info / Payment Setup is complete
+            if (!data || !data.storeName || !data.personalAddress || !data.whatsapp) {
+                window.showToast("আপনার অ্যাকাউন্ট ইনফো বা পেমেন্ট সেটআপ সম্পূর্ণ করা নেই। সেটিংসে নিয়ে যাওয়া হচ্ছে।", true);
+                showView('settings');
+                return;
+            }
+
+            // Check Balance
+            if (!window.userState.balance || window.userState.balance <= 0 || (amount && amount > window.userState.balance)) {
+                window.showToast("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!", true);
+                return;
+            }
+
+            if(!amount || amount <= 0) {
+                window.showToast("সঠিক পে-আউট অ্যামাউন্ট লিখুন!", true);
+                return;
+            }
+
+            const btn = document.getElementById('payoutSubmitBtn');
+            btn.innerHTML = `<i class="fa-solid fa-check"></i> Requested`;
+            btn.style.background = "var(--gold-solid)";
+            btn.style.color = "#000";
+
+            window.showToast("Payout Request Submitted Successfully!");
+            amountInput.value = "";
+
+            setTimeout(() => {
+                btn.innerHTML = `Payout Request`;
+                btn.style.background = "";
+                btn.style.color = "";
+            }, 3500);
         }
     </script>
 
@@ -651,21 +692,18 @@
             border: 1px solid var(--gold-solid); color: #fff; padding: 12px 18px;
             border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 9999; display: none; font-size: 0.78rem; font-weight: 600;
         }
-        
-        .back-cat-btn { background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
     </style>
 
     <script>
-        function showView(viewName) {
+        function toggleSettingsView() {
             const overviewSec = document.getElementById('overviewView');
             const settingsSec = document.getElementById('settingsView');
 
-            overviewSec.style.display = 'none';
-            settingsSec.style.display = 'none';
-
-            if(viewName === 'overview') {
+            if(settingsSec.style.display === 'block') {
+                settingsSec.style.display = 'none';
                 overviewSec.style.display = 'block';
-            } else if(viewName === 'settings') {
+            } else {
+                overviewSec.style.display = 'none';
                 settingsSec.style.display = 'block';
                 
                 setTimeout(() => {
@@ -678,6 +716,18 @@
                         });
                     }
                 }, 100);
+            }
+        }
+
+        function showView(viewName) {
+            const overviewSec = document.getElementById('overviewView');
+            const settingsSec = document.getElementById('settingsView');
+            if(viewName === 'settings') {
+                overviewSec.style.display = 'none';
+                settingsSec.style.display = 'block';
+            } else {
+                settingsSec.style.display = 'none';
+                overviewSec.style.display = 'block';
             }
         }
 
@@ -707,16 +757,6 @@
                     <div class="form-group"><label>Branch Name</label><input type="text" placeholder="Branch" required></div>
                     <div class="form-group"><label>Routing Code</label><input type="text" placeholder="Routing / Swift" required></div>`;
             } else { container.innerHTML = ''; }
-        }
-
-        function requestPayoutAction() {
-            const amount = document.getElementById('payoutRequestAmount').value;
-            if(!amount || amount <= 0) {
-                window.showToast("সঠিক পে-আউট অ্যামাউন্ট লিখুন!", true);
-                return;
-            }
-            window.showToast("Payout Request Submitted Successfully!");
-            document.getElementById('payoutRequestAmount').value = "";
         }
     </script>
 </head>
@@ -776,7 +816,10 @@
                     <strong id="modalProductAmount" style="color: var(--gold-solid);"></strong>
                 </div>
             </div>
-            <button class="save-btn" onclick="closeOrderViewModal()">Close View</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="save-btn" onclick="closeOrderViewModal()" style="flex: 1; background: #1a1a1c; color: #fff;">Close</button>
+                <a href="r.html" class="save-btn" style="flex: 1; text-align: center; text-decoration: none; line-height: normal; display: flex; align-items: center; justify-content: center;">View Product Page</a>
+            </div>
         </div>
     </div>
 
@@ -800,14 +843,14 @@
     <div id="dashboardSection">
         <header class="dash-header">
             <div class="dash-logo-area">
-                <img id="headerUserAvatar" src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="dash-logo-img" onclick="showView('settings')" title="Click to open Settings & Branding">
+                <img id="headerUserAvatar" src="https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" alt="Logo" class="dash-logo-img" onclick="toggleSettingsView()" title="Click to open Settings & Branding">
                 <div class="user-big-identity">
                     <h2 id="headerUserName">MR MASUDAR ENTERPRISE</h2>
                     <p id="headerUserId">ID: loading...</p>
                 </div>
             </div>
             <div class="header-right-actions">
-                <button class="header-settings-btn" onclick="showView('settings')"><i class="fa-solid fa-gear"></i> Settings & Security</button>
+                <button class="header-settings-btn" onclick="toggleSettingsView()"><i class="fa-solid fa-gear"></i> Settings & Security</button>
             </div>
         </header>
 
@@ -842,8 +885,8 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Product Info (Image & View)</th>
+                                <th>Order ID & Date</th>
+                                <th>Product Info (View Details)</th>
                                 <th>Chat Option</th>
                                 <th>Processing (Notification)</th>
                                 <th>Hybrid Tracking (Auto / Manual)</th>
@@ -885,7 +928,7 @@
                 <p style="color: var(--text-gray); font-size: 0.74rem; margin-bottom: 16px;">Withdraw available earnings to your configured payment gateway in Settings.</p>
                 <div style="display: flex; gap: 12px; max-width: 380px; margin: 0 auto; flex-wrap: wrap;">
                     <input type="number" step="0.01" id="payoutRequestAmount" placeholder="Enter Amount ($)" style="flex: 1; min-width: 180px; background: #08080a; border: 1px solid var(--border-color); border-radius: 10px; padding: 11px; color: #fff; outline: none; font-size: 0.8rem;">
-                    <button type="button" class="luxury-upload-main-btn" style="padding: 11px 18px; font-size: 0.74rem; border-radius: 10px; min-width: unset;" onclick="requestPayoutAction()">Payout</button>
+                    <button type="button" id="payoutSubmitBtn" class="luxury-upload-main-btn" style="padding: 11px 18px; font-size: 0.74rem; border-radius: 10px; min-width: unset;" onclick="requestPayoutAction()">Payout Request</button>
                 </div>
             </div>
         </div>
@@ -894,7 +937,6 @@
         <div id="settingsView">
             <div class="settings-container">
                 <div class="settings-top-actions">
-                    <button type="button" class="back-cat-btn" onclick="showView('overview')"><i class="fa-solid fa-arrow-left"></i> BACK TO OVERVIEW</button>
                     <span style="font-size: 0.85rem; font-weight: 600; color: var(--gold-solid); text-transform: uppercase;">Seller Settings & Security</span>
                 </div>
 
