@@ -140,12 +140,12 @@
 
             await loadSellerProducts();
             loadSingleSampleOrder();
-            populateAllCountryCodes();
             detectUserCountryAndSetCode();
 
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
             
+            // Check onboarding state
             if (!isOnboarded) {
                 openMandatoryOnboardingModal();
             } else {
@@ -153,68 +153,6 @@
             }
 
             showSpinner(false);
-        }
-
-        const countryList = [
-            { name: "Afghanistan", code: "+93" }, { name: "Albania", code: "+355" }, { name: "Algeria", code: "+213" },
-            { name: "Andorra", code: "+376" }, { name: "Angola", code: "+244" }, { name: "Argentina", code: "+54" },
-            { name: "Armenia", code: "+374" }, { name: "Australia", code: "+61" }, { name: "Austria", code: "+43" },
-            { name: "Azerbaijan", code: "+994" }, { name: "Bahrain", code: "+973" }, { name: "Bangladesh", code: "+880" },
-            { name: "Belarus", code: "+375" }, { name: "Belgium", code: "+32" }, { name: "Belize", code: "+501" },
-            { name: "Benin", code: "+229" }, { name: "Bhutan", code: "+975" }, { name: "Bolivia", code: "+591" },
-            { name: "Bosnia and Herzegovina", code: "+387" }, { name: "Botswana", code: "+267" }, { name: "Brazil", code: "+55" },
-            { name: "Brunei", code: "+673" }, { name: "Bulgaria", code: "+359" }, { name: "Burkina Faso", code: "+226" },
-            { name: "Cambodia", code: "+855" }, { name: "Cameroon", code: "+237" }, { name: "Canada", code: "+1" },
-            { name: "Chile", code: "+56" }, { name: "China", code: "+86" }, { name: "Colombia", code: "+57" },
-            { name: "Congo", code: "+242" }, { name: "Costa Rica", code: "+506" }, { name: "Croatia", code: "+385" },
-            { name: "Cuba", code: "+53" }, { name: "Cyprus", code: "+357" }, { name: "Czech Republic", code: "+420" },
-            { name: "Denmark", code: "+45" }, { name: "Djibouti", code: "+253" }, { name: "Dominican Republic", code: "+1809" },
-            { name: "Ecuador", code: "+593" }, { name: "Egypt", code: "+20" }, { name: "El Salvador", code: "+503" },
-            { name: "Estonia", code: "+372" }, { name: "Ethiopia", code: "+251" }, { name: "Fiji", code: "+679" },
-            { name: "Finland", code: "+358" }, { name: "France", code: "+33" }, { name: "Gabon", code: "+241" },
-            { name: "Gambia", code: "+220" }, { name: "Georgia", code: "+995" }, { name: "Germany", code: "+49" },
-            { name: "Ghana", code: "+233" }, { name: "Greece", code: "+30" }, { name: "Guatemala", code: "+502" },
-            { name: "Honduras", code: "+504" }, { name: "Hong Kong", code: "+852" }, { name: "Hungary", code: "+36" },
-            { name: "Iceland", code: "+354" }, { name: "India", code: "+91" }, { name: "Indonesia", code: "+62" },
-            { name: "Iran", code: "+98" }, { name: "Iraq", code: "+964" }, { name: "Ireland", code: "+353" },
-            { name: "Israel", code: "+972" }, { name: "Italy", code: "+39" }, { name: "Jamaica", code: "+1876" },
-            { name: "Japan", code: "+81" }, { name: "Jordan", code: "+962" }, { name: "Kazakhstan", code: "+7" },
-            { name: "Kenya", code: "+254" }, { name: "Kuwait", code: "+965" }, { name: "Kyrgyzstan", code: "+996" },
-            { name: "Laos", code: "+856" }, { name: "Latvia", code: "+371" }, { name: "Lebanon", code: "+961" },
-            { name: "Libya", code: "+218" }, { name: "Lithuania", code: "+370" }, { name: "Luxembourg", code: "+352" },
-            { name: "Malaysia", code: "+60" }, { name: "Maldives", code: "+960" }, { name: "Malta", code: "+356" },
-            { name: "Mexico", code: "+52" }, { name: "Monaco", code: "+377" }, { name: "Mongolia", code: "+976" },
-            { name: "Morocco", code: "+212" }, { name: "Myanmar", code: "+95" }, { name: "Nepal", code: "+977" },
-            { name: "Netherlands", code: "+31" }, { name: "New Zealand", code: "+64" }, { name: "Nicaragua", code: "+505" },
-            { name: "Nigeria", code: "+234" }, { name: "North Korea", code: "+850" }, { name: "Norway", code: "+47" },
-            { name: "Oman", code: "+968" }, { name: "Pakistan", code: "+92" }, { name: "Panama", code: "+507" },
-            { name: "Paraguay", code: "+595" }, { name: "Peru", code: "+51" }, { name: "Philippines", code: "+63" },
-            { name: "Poland", code: "+48" }, { name: "Portugal", code: "+351" }, { name: "Qatar", code: "+974" },
-            { name: "Romania", code: "+40" }, { name: "Russia", code: "+7" }, { name: "Saudi Arabia", code: "+966" },
-            { name: "Senegal", code: "+221" }, { name: "Serbia", code: "+381" }, { name: "Singapore", code: "+65" },
-            { name: "Slovakia", code: "+421" }, { name: "Slovenia", code: "+386" }, { name: "South Africa", code: "+27" },
-            { name: "South Korea", code: "+82" }, { name: "Spain", code: "+34" }, { name: "Sri Lanka", code: "+94" },
-            { name: "Sudan", code: "+249" }, { name: "Sweden", code: "+46" }, { name: "Switzerland", code: "+41" },
-            { name: "Syria", code: "+963" }, { name: "Taiwan", code: "+886" }, { name: "Tajikistan", code: "+992" },
-            { name: "Tanzania", code: "+255" }, { name: "Thailand", code: "+66" }, { name: "Tunisia", code: "+216" },
-            { name: "Turkey", code: "+90" }, { name: "Turkmenistan", code: "+993" }, { name: "UAE", code: "+971" },
-            { name: "Uganda", code: "+256" }, { name: "Ukraine", code: "+380" }, { name: "United Kingdom", code: "+44" },
-            { name: "United States", code: "+1" }, { name: "Uruguay", code: "+598" }, { name: "Uzbekistan", code: "+998" },
-            { name: "Venezuela", code: "+58" }, { name: "Vietnam", code: "+84" }, { name: "Yemen", code: "+967" },
-            { name: "Zambia", code: "+260" }, { name: "Zimbabwe", code: "+263" }
-        ];
-
-        function populateAllCountryCodes() {
-            const select = document.getElementById('countryCodeSelect');
-            if(!select) return;
-            select.innerHTML = "";
-            countryList.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.code;
-                opt.innerText = `${c.name} (${c.code})`;
-                if(c.code === "+880") opt.selected = true;
-                select.appendChild(opt);
-            });
         }
 
         async function detectUserCountryAndSetCode() {
@@ -390,11 +328,13 @@
                 </td>
                 <td>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <!-- Auto tracking integrated via API simulation -->
                         <div id="autoTrackBox_${sampleOrder.orderId}" style="display: flex; align-items: center; gap: 6px; background: rgba(0,255,100,0.05); border: 1px solid rgba(0,255,100,0.3); padding: 4px 8px; border-radius: 6px;">
                             <i class="fa-solid fa-check-circle" style="color: #00ff64; font-size: 0.75rem;"></i>
                             <span style="font-size: 0.68rem; color: #00ff64; font-weight: 600;">Auto Track API: <span id="autoTrackId_${sampleOrder.orderId}">TRK-AUTO-88421</span></span>
                         </div>
                         <div style="font-size: 0.62rem; color: var(--text-gray); text-align: center;">--- OR ---</div>
+                        <!-- Manual tracking trigger -->
                         <button onclick="openManualTrackModal('${sampleOrder.orderId}')" style="background: #141417; border: 1px solid var(--border-color); color: var(--gold-solid); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 600;"><i class="fa-solid fa-pen-to-square"></i> Manual Courier & Tracking</button>
                     </div>
                 </td>
@@ -799,9 +739,9 @@
     <div id="mandatoryOnboardingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10005; padding: 15px;">
         <div style="background: var(--card-bg); border: 1px solid var(--gold-solid); border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h4><i class="fa-solid fa-shield-cat"></i> COMPLETE ONBOARDING & SETTINGS SETUP</h4>
+                <h4><i class="fa-solid fa-shield-cat"></i> Complete Onboarding & Settings Setup</h4>
             </div>
-            
+            <p style="font-size: 0.74rem; color: var(--text-gray); margin-bottom: 16px;">ড্যাশবোর্ড সম্পূর্ণভাবে দেখতে অনুগ্রহ করে আপনার অ্যাকাউন্ট ইনফো, পেমেন্ট সেটআপ এবং সিকিউরিটি পিন সম্পন্ন করুন।</p>
             <form onsubmit="saveAccountForm(event)">
                 <div class="form-group"><label>Full Name</label><input type="text" id="storeFullName" required></div>
                 <div class="form-group"><label>Store Name</label><input type="text" id="storeNameInput" required></div>
@@ -811,8 +751,12 @@
                 <div class="form-group">
                     <label>WhatsApp Number</label>
                     <div style="display: flex; gap: 8px;">
-                        <select id="countryCodeSelect" style="width: 160px; background: #08080a; border: 1px solid var(--border-color); color: var(--gold-solid); border-radius: 10px; padding: 11px 8px; font-size: 0.75rem; max-height: 150px; overflow-y: auto;">
-                            <!-- Populated dynamically via JS with 195+ countries -->
+                        <select id="countryCodeSelect" style="width: 130px; background: #08080a; border: 1px solid var(--border-color); color: var(--gold-solid); border-radius: 10px; padding: 11px 8px; font-size: 0.75rem;">
+                            <option value="+880">🇧🇩 +880 (BD)</option>
+                            <option value="+1">🇺🇸 +1 (US)</option>
+                            <option value="+44">🇬🇧 +44 (UK)</option>
+                            <option value="+91">🇮🇳 +91 (IN)</option>
+                            <option value="+971">🇦🇪 +971 (UAE)</option>
                         </select>
                         <input type="text" id="whatsappInput" placeholder="17XXXXXXXX" required style="flex: 1;">
                     </div>
@@ -983,7 +927,7 @@
             </div>
         </div>
 
-        <!-- SETTINGS PANEL CONTAINER -->
+        <!-- SETTINGS PANEL CONTAINER (Toggled via Settings Button) -->
         <div id="settingsSectionContainer">
             <div class="settings-container">
                 <div class="settings-nav-tabs">
