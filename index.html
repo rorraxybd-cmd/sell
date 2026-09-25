@@ -147,7 +147,7 @@
             }
 
             await loadSellerProducts();
-            loadMockOrders();
+            loadSingleSampleOrder();
 
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
@@ -274,52 +274,90 @@
             }
         }
 
-        function loadMockOrders() {
+        function loadSingleSampleOrder() {
             const orderTbody = document.getElementById('orderTableBody');
-            const sampleOrders = [
-                { orderId: "ORD-92814", item: "Gamar Wood Center Table", qty: 1, amount: "$120.00", status: "To Process", tracking: "", courier: "Auto API", img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" },
-                { orderId: "ORD-92815", item: "Baby Organic Cotton Shirt", qty: 2, amount: "$35.50", status: "Ready to Ship", tracking: "TRK-BD-89312", courier: "Steadfast (Manual)", img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" },
-                { orderId: "ORD-92816", item: "Smart Live Streaming Light", qty: 1, amount: "$45.00", status: "Shipped", tracking: "TRK-DHL-99482", courier: "DHL Global", img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png" }
-            ];
+            const sampleOrder = { 
+                orderId: "ORD-92814", 
+                item: "Gamar Wood Center Table", 
+                qty: 1, 
+                amount: "$120.00", 
+                status: "Ready to Ship", 
+                tracking: "", 
+                img: "https://pub-508ef1e45bab487aadde85a1dba202c4.r2.dev/rorraxyfree/mr%20masudar%20logo%20(3).png",
+                details: "High-end Gamar wood center table with Golden Teak finish. Premium handcrafted quality."
+            };
 
             orderTbody.innerHTML = "";
-            sampleOrders.forEach((ord) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${ord.orderId}</strong></td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="${ord.img}" alt="Product" style="width: 36px; height: 36px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="window.showToast('Viewing full image details for ${ord.item}')" title="Click to view full image">
-                            <div>
-                                <strong>${ord.item}</strong><br>
-                                <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${ord.qty} | <button class="chat-seller-btn" style="padding:2px 6px; font-size:0.6rem;" onclick="window.showToast('Opening live chat for Order ${ord.orderId}')"><i class="fa-solid fa-comments"></i> Chat</button></span>
-                            </div>
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${sampleOrder.orderId}</strong></td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${sampleOrder.img}" alt="Product" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" title="Click to view full details">
+                        <div>
+                            <strong style="cursor: pointer; color: var(--gold-solid);" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')">${sampleOrder.item}</strong><br>
+                            <span style="font-size: 0.68rem; color: var(--text-gray);">Qty: ${sampleOrder.qty} | <button class="view-details-link" onclick="openOrderViewModal('${sampleOrder.orderId}', '${sampleOrder.item}', ${sampleOrder.qty}, '${sampleOrder.amount}', '${sampleOrder.img}', '${sampleOrder.details}')" style="background:none; border:none; color:var(--gold-solid); cursor:pointer; padding:0; font-size:0.68rem; text-decoration:underline;">View Details</button></span>
                         </div>
-                    </td>
-                    <td>${ord.amount}</td>
-                    <td>
-                        <select onchange="window.showToast('Order ${ord.orderId} status updated to: ' + this.value)" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; outline:none;">
-                            <option value="To Process" ${ord.status === 'To Process' ? 'selected' : ''}>To Process</option>
-                            <option value="Ready to Ship" ${ord.status === 'Ready to Ship' ? 'selected' : ''}>Ready to Ship</option>
-                            <option value="Shipping Auto/Manual" ${ord.status === 'Shipped' ? 'selected' : ''}>Shipping (Auto/Manual)</option>
+                    </div>
+                </td>
+                <td>
+                    <button class="chat-seller-btn" onclick="openChatBox('${sampleOrder.orderId}')"><i class="fa-solid fa-comments"></i> Chat (0)</button>
+                </td>
+                <td>${sampleOrder.amount}</td>
+                <td>
+                    <select onchange="window.showToast('Order Status updated to: ' + this.value)" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; outline:none;">
+                        <option value="Ready to Ship" selected>Ready to Ship</option>
+                        <option value="Processing">Processing</option>
+                    </select>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <select style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px; border-radius:6px; font-size:0.65rem; outline:none;">
+                            <option value="Auto Track">Auto Track</option>
+                            <option value="Manual Track">Manual Track</option>
                         </select>
-                    </td>
-                    <td>
-                        <input type="text" value="${ord.tracking}" placeholder="Enter Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px 6px; border-radius:6px; font-size:0.7rem; width:110px; outline:none;">
-                        <button onclick="window.showToast('Tracking saved for ${ord.orderId}')" style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:var(--gold-solid); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.65rem; margin-left:4px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                    </td>
-                    <td>
-                        <select onchange="window.showToast('Order Action updated to: ' + this.value)" style="background:#08080a; border:1px solid var(--border-color); color:var(--gold-solid); padding:4px 6px; border-radius:6px; font-size:0.7rem; outline:none; font-weight:600;">
-                            <option value="Pending">Select Action</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Return / Cancel">Return / Cancel</option>
-                        </select>
-                    </td>
-                `;
-                orderTbody.appendChild(tr);
-            });
-            // ডিফল্ট টোটাল অর্ডার জিরো বা ডেমো অনুযায়ী সেট করা
+                        <input type="text" placeholder="Tracking ID" style="background:#08080a; border:1px solid var(--border-color); color:#fff; padding:4px 6px; border-radius:6px; font-size:0.7rem; width:95px; outline:none;">
+                        <button onclick="window.showToast('Hybrid Tracking saved successfully!')" style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:var(--gold-solid); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.65rem;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                    </div>
+                </td>
+                <td><span style="color: var(--text-gray); font-size: 0.72rem; font-weight: 600;">Pending Delivery</span></td>
+            `;
+            orderTbody.appendChild(tr);
             document.getElementById('totalOrdersCount').innerText = "0";
+        }
+
+        window.openOrderViewModal = function(orderId, item, qty, amount, img, details) {
+            document.getElementById('modalOrderIdText').innerText = orderId;
+            document.getElementById('modalProductImg').src = img;
+            document.getElementById('modalProductName').innerText = item;
+            document.getElementById('modalProductQty').innerText = qty;
+            document.getElementById('modalProductAmount').innerText = amount;
+            document.getElementById('modalProductDetails').innerText = details;
+            document.getElementById('orderViewModalOverlay').style.display = 'flex';
+        }
+
+        window.closeOrderViewModal = function() {
+            document.getElementById('orderViewModalOverlay').style.display = 'none';
+        }
+
+        window.openChatBox = function(orderId) {
+            document.getElementById('chatModalTitle').innerText = "Customer Live Chat - Order: " + orderId;
+            document.getElementById('chatModalOverlay').style.display = 'flex';
+        }
+
+        window.closeChatBox = function() {
+            document.getElementById('chatModalOverlay').style.display = 'none';
+        }
+
+        window.sendChatMessage = function() {
+            const input = document.getElementById('chatMessageInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            const body = document.getElementById('chatMessagesBody');
+            body.innerHTML += `<div style="text-align: right; margin-bottom: 8px;"><span style="background: var(--gold-solid); color: #000; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">${msg}</span></div>`;
+            input.value = "";
+            body.scrollTop = body.scrollHeight;
+            window.showToast("Message sent to customer!");
         }
     </script>
 
@@ -401,7 +439,6 @@
             margin: 0 auto; padding: 24px 16px;
         }
 
-        /* Header */
         .dash-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color); padding-bottom: 18px;
@@ -425,7 +462,6 @@
         }
         .header-settings-btn:hover { background: var(--gold-solid); color: #000; }
 
-        /* Summary Metric Cards (মোবাইলে ২টা করে দেখানোর জন্য রেস্পন্সিভ গ্রিড) */
         .summary-grid {
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -459,7 +495,6 @@
             opacity: 0.8;
         }
 
-        /* Top Action Bar */
         .dashboard-actions-bar {
             display: flex; justify-content: space-between; align-items: center;
             margin: 20px 0 24px 0; flex-wrap: wrap; gap: 15px;
@@ -537,7 +572,7 @@
 
         .card-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 14px; padding: 18px; margin-bottom: 20px; overflow-x: auto; box-shadow: var(--card-shadow);
+            border-radius: 14px; padding: 18px; margin-bottom: 20px; box-shadow: var(--card-shadow);
         }
         .card-box-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -545,13 +580,20 @@
         }
         .card-box-header h3 { margin: 0; font-size: 0.88rem; color: #fff; font-weight: 600; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; min-width: 800px; }
-        th { color: var(--text-gray); font-weight: 500; padding: 10px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; }
+        /* মোবাইল স্ক্রোলেবল টেবিল কন্টেইনার */
+        .table-responsive-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; min-width: 900px; }
+        th { color: var(--text-gray); font-weight: 500; padding: 10px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.02); color: #ccc; vertical-align: middle; white-space: nowrap; }
 
         .chat-seller-btn {
             background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--gold-solid); padding: 5px 9px; border-radius: 14px; font-size: 0.68rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+            color: var(--gold-solid); padding: 5px 10px; border-radius: 14px; font-size: 0.68rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
         }
         .chat-seller-btn:hover { background: var(--gold-solid); color: #000; }
 
@@ -705,6 +747,49 @@
         </div>
     </div>
 
+    <!-- Order Details Popup Modal -->
+    <div id="orderViewModalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 15px;" onclick="if(event.target === this) closeOrderViewModal()">
+        <div style="background: var(--card-bg); border: 1px solid var(--border-hover); border-radius: 20px; width: 100%; max-width: 450px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+            <div class="modal-header">
+                <h4 id="modalOrderIdTitle">Order Details: <span id="modalOrderIdText" style="color: var(--gold-solid);"></span></h4>
+                <button class="modal-close-btn" onclick="closeOrderViewModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img id="modalProductImg" src="" alt="Product" style="width: 90px; height: 90px; object-fit: cover; border-radius: 12px; border: 2px solid var(--gold-solid); margin-bottom: 10px;">
+                <h3 id="modalProductName" style="margin: 0 0 5px 0; font-size: 1rem; color: #fff;"></h3>
+                <p id="modalProductDetails" style="margin: 0; font-size: 0.75rem; color: var(--text-gray); line-height: 1.5;"></p>
+            </div>
+            <div style="background: #141417; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 0.8rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-gray);">Ordered Quantity:</span>
+                    <strong id="modalProductQty" style="color: #fff;"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-gray);">Total Amount:</span>
+                    <strong id="modalProductAmount" style="color: var(--gold-solid);"></strong>
+                </div>
+            </div>
+            <button class="save-btn" onclick="closeOrderViewModal()">Close View</button>
+        </div>
+    </div>
+
+    <!-- Chat Box Modal -->
+    <div id="chatModalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10002; padding: 15px;" onclick="if(event.target === this) closeChatBox()">
+        <div style="background: var(--card-bg); border: 1px solid var(--border-hover); border-radius: 20px; width: 100%; max-width: 420px; height: 480px; display: flex; flex-direction: column; box-shadow: 0 15px 40px rgba(0,0,0,0.8); overflow: hidden;">
+            <div class="modal-header" style="padding: 14px 18px; margin: 0;">
+                <h4 id="chatModalTitle" style="font-size: 0.85rem;">Customer Live Chat</h4>
+                <button class="modal-close-btn" onclick="closeChatBox()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chatMessagesBody" style="flex: 1; padding: 14px; overflow-y: auto; background: #08080a;">
+                <div style="text-align: left; margin-bottom: 8px;"><span style="background: #1d1d22; color: #ccc; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; display: inline-block;">Hello seller, I have a query regarding my order shipment!</span></div>
+            </div>
+            <div style="padding: 12px; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; gap: 8px;">
+                <input type="text" id="chatMessageInput" placeholder="Type message to customer..." style="flex: 1; background: #08080a; border: 1px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 0.75rem; outline: none;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" style="background: var(--gold-gradient); border: none; color: #000; font-weight: 700; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.75rem;"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <div id="dashboardSection">
         <header class="dash-header">
             <div class="dash-logo-area">
@@ -741,47 +826,52 @@
                 </div>
             </div>
 
-            <!-- Store Orders & Hybrid Tracking Section -->
+            <!-- Store Orders & Hybrid Tracking Section (Scrollable on Mobile) -->
             <div class="card-box">
                 <div class="card-box-header">
                     <h3><i class="fa-solid fa-clipboard-list" style="color: var(--gold-solid); margin-right: 6px;"></i> Store Orders & Hybrid Tracking (Auto + Manual)</h3>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Product Info (Image & Details)</th>
-                            <th>Amount</th>
-                            <th>Status (Auto / Manual)</th>
-                            <th>Tracking ID & Save</th>
-                            <th>Delivery / Return Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;">Loading incoming orders...</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product Info (Image & View)</th>
+                                <th>Chat Option</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Hybrid Tracking (Auto / Manual)</th>
+                                <th>Delivery / Return</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <tr><td colspan="7" style="text-align: center; color: #777; padding: 20px;">Loading incoming order sample...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="card-box">
                 <div class="card-box-header"><h3><i class="fa-solid fa-box" style="color: var(--gold-solid); margin-right: 6px;"></i> My Store Products List</h3></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product ID / Title</th>
-                            <th>Chat</th>
-                            <th>Price</th>
-                            <th>Discount</th>
-                            <th>Stock</th>
-                            <th>Details</th>
-                            <th>Custom Size & Note</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody">
-                        <tr><td colspan="8" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet.</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID / Title</th>
+                                <th>Chat</th>
+                                <th>Price</th>
+                                <th>Discount</th>
+                                <th>Stock</th>
+                                <th>Details</th>
+                                <th>Custom Size & Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            <tr><td colspan="8" style="text-align: center; color: var(--text-gray); padding: 20px;">No products uploaded yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="card-box" style="text-align: center; padding: 24px;">
